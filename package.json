@@ -1,0 +1,21 @@
+{
+  "name": "lodash-fantasy",
+  "version": "0.0.0",
+  "description": "Fantasy Land compatible types built with lodash.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "category",
+    "fantasy",
+    "functional",
+    "land",
+    "lodash"
+  ],
+  "author": "Justin Morgan <justin.l.morgan@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.12.0"
+  }
+}
