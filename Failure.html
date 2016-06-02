@@ -26,7 +26,7 @@
     
     
     <script>
-    var config = {"monospaceLinks":false,"cleverLinks":false,"applicationName":"lodash-fantasy","collapseSymbols":false,"default":{"outputSourceFiles":true},"linenums":true,"meta":{"description":"Fantasy Land compatible types built with lodash.","title":"Lodash Fantasy"},"openGraph":{"type":"website"}};
+    var config = {"monospaceLinks":true,"cleverLinks":false,"applicationName":"lodash-fantasy","collapseSymbols":false,"default":{"outputSourceFiles":true},"linenums":true,"meta":{"description":"Fantasy Land compatible types built with lodash.","title":"Lodash Fantasy"},"openGraph":{"type":"website"}};
     </script>
     
 
@@ -69,6 +69,8 @@
                 <li data-name="Failure#concat"><a href="Failure.html#concat">concat</a></li>
             
                 <li data-name="Failure#equals"><a href="Failure.html#equals">equals</a></li>
+            
+                <li data-name="Failure#extend"><a href="Failure.html#extend">extend</a></li>
             
                 <li data-name="Failure#ifSuccess"><a href="Failure.html#ifSuccess">ifSuccess</a></li>
             
@@ -122,6 +124,8 @@
                 <li data-name="Success#concat"><a href="Success.html#concat">concat</a></li>
             
                 <li data-name="Success#equals"><a href="Success.html#equals">equals</a></li>
+            
+                <li data-name="Success#extend"><a href="Success.html#extend">extend</a></li>
             
                 <li data-name="Success#ifSuccess"><a href="Success.html#ifSuccess">ifSuccess</a></li>
             
@@ -216,6 +220,10 @@
             
                 <li data-name="Validation#equals"><a href="Validation.html#equals">equals</a></li>
             
+                <li data-name="Validation#extend"><a href="Validation.html#extend">extend</a></li>
+            
+                <li data-name="Validation#extend"><a href="Validation.html#extend">extend</a></li>
+            
                 <li data-name="Validation#ifSuccess"><a href="Validation.html#ifSuccess">ifSuccess</a></li>
             
                 <li data-name="Validation#isFailure"><a href="Validation.html#isFailure">isFailure</a></li>
@@ -274,7 +282,7 @@
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line888">line 888</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line919">line 919</a>
         </div>
         
     </div>
@@ -365,7 +373,7 @@
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line917">line 917</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line948">line 948</a>
         </div>
         
     </div>
@@ -376,9 +384,9 @@
     
     
     <div class="description">
-        Creates a new <code>Failure</code> from a <code>value</code>. If the <code>value</code> is already a
-<code>Validation</code> instance, the <code>value</code> is returned unchanged. Otherwise, a new
-<code>Failure</code> is made with the <code>value</code>.
+        Creates a new <a href="Failure.html"><code>Failure</code></a> from a <code>value</code>. If the <code>value</code> is already a <a href="Validation.html"><code>Validation</code></a>
+instance, the <code>value</code> is returned unchanged. Otherwise, a new <a href="Failure.html"><code>Failure</code></a> is made with the
+<code>value</code>.
     </div>
     
 
@@ -425,7 +433,7 @@
             
             <td class="description last">
                 
-                Value to wrap in a <code>Failure</code>.</td>
+                Value to wrap in a <a href="Failure.html"><code>Failure</code></a>.</td>
         </tr>
 	
 	
@@ -490,8 +498,8 @@
                         
                     
             </td>
-            <td class="description last"><code>Validation</code> when is the <code>value</code> already wrapped or
-<code>Failure</code> wrapped <code>value</code>.</td>
+            <td class="description last"><a href="Validation.html"><code>Validation</code></a> when is the <code>value</code> already wrapped or
+<a href="Failure.html"><code>Failure</code></a> wrapped <code>value</code>.</td>
         </tr>
     
     </tbody>
@@ -550,7 +558,7 @@
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line338">line 338</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line334">line 334</a>
         </div>
         
     </div>
@@ -561,11 +569,10 @@
     
     
     <div class="description">
-        Applies the function contained in the instance of a <code>Success</code> to the value contained in the provided
-<code>Success</code>, producing a <code>Success</code> containing the result. If the instance is
-<code>Failure</code>, the result will be the the <code>Failure</code> instance. If the instance is
-<code>Success</code> and the provided validation is <code>Failure</code>, the result is the provided
-<code>Failure</code>.
+        Applies the function contained in the instance of a <a href="Success.html"><code>Success</code></a> to the value contained in the provided
+<a href="Success.html"><code>Success</code></a>, producing a <a href="Success.html"><code>Success</code></a> containing the result. If the instance is <a href="Failure.html"><code>Failure</code></a>, the result
+is a <a href="Failure.html"><code>Failure</code></a> instance. If the instance is <a href="Success.html"><code>Success</code></a> and the provided validation is <a href="Failure.html"><code>Failure</code></a>,
+the result is the provided <a href="Failure.html"><code>Failure</code></a>.
     </div>
     
 
@@ -612,7 +619,7 @@
             
             <td class="description last">
                 
-                Value to apply to the function wrapped in the <code>Success</code>.</td>
+                Value to apply to the function wrapped in the <a href="Success.html"><code>Success</code></a>.</td>
         </tr>
 	
 	
@@ -677,7 +684,7 @@
                         
                     
             </td>
-            <td class="description last"><code>Success</code> wrapped applied function or <code>Failure</code>.</td>
+            <td class="description last"><a href="Success.html"><code>Success</code></a> wrapped applied function or <a href="Failure.html"><code>Failure</code></a>.</td>
         </tr>
     
     </tbody>
@@ -719,7 +726,7 @@ Success.from(createPerson) // => Success(createPerson)
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line363">line 363</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line358">line 358</a>
         </div>
         
     </div>
@@ -730,9 +737,8 @@ Success.from(createPerson) // => Success(createPerson)
     
     
     <div class="description">
-        Transforms a <code>Validation</code> by applying the first function to the contained value for a
-<code>Failure</code> or the second function for a <code>Success</code>. The result of each map is wrapped in the
-corresponding type.
+        Transforms a <a href="Validation.html"><code>Validation</code></a> by applying the first function to the contained value for a <a href="Failure.html"><code>Failure</code></a> or the
+second function for a <a href="Success.html"><code>Success</code></a>. The result of each map is wrapped in the corresponding type.
     </div>
     
 
@@ -779,7 +785,7 @@ corresponding type.
             
             <td class="description last">
                 
-                Map to apply to the <code>Failure</code>.</td>
+                Map to apply to the <a href="Failure.html"><code>Failure</code></a>.</td>
         </tr>
 	
 	
@@ -802,7 +808,7 @@ corresponding type.
             
             <td class="description last">
                 
-                Map to apply to the <code>Success</code>.</td>
+                Map to apply to the <a href="Success.html"><code>Success</code></a>.</td>
         </tr>
 	
 	
@@ -867,7 +873,7 @@ corresponding type.
                         
                     
             </td>
-            <td class="description last"><code>Validation</code> wrapped value mapped with the corresponding mapping function.</td>
+            <td class="description last"><a href="Validation.html"><code>Validation</code></a> wrapped value mapped with the corresponding mapping function.</td>
         </tr>
     
     </tbody>
@@ -901,7 +907,7 @@ corresponding type.
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line381">line 381</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line375">line 375</a>
         </div>
         
     </div>
@@ -912,9 +918,9 @@ corresponding type.
     
     
     <div class="description">
-        Applies the provided function to the value contained for a <code>Success</code>. The function should return the
-value wrapped in a <code>Validation</code>. If the instance is a <code>Failure</code>, the function is ignored and
-then instance is returned unchanged.
+        Applies the provided function to the value contained for a <a href="Success.html"><code>Success</code></a>. The function should return the value
+wrapped in a <a href="Validation.html"><code>Validation</code></a>. If the instance is a <a href="Failure.html"><code>Failure</code></a>, the function is ignored and then instance is
+returned unchanged.
     </div>
     
 
@@ -1026,7 +1032,7 @@ then instance is returned unchanged.
                         
                     
             </td>
-            <td class="description last"><code>Validation</code> wrapped value returned by the provided <code>method</code>.</td>
+            <td class="description last"><a href="Validation.html"><code>Validation</code></a> wrapped value returned by the provided <code>method</code>.</td>
         </tr>
     
     </tbody>
@@ -1046,7 +1052,7 @@ const validateResponse = response => HttpStatus.isSuccess(response.statusCode) ?
   Success(response) :
   Failure(response.statusMessage);
 
-const updatePerson = flow(Person.update, validateResponse); // Expects instance of Person
+const createPerson = flow(Person.create, validateResponse); // Expects instance of Person
 
 const validations = [
   validatePersonName(person), // => Success(person)
@@ -1056,7 +1062,7 @@ const validations = [
 ];
 
 Validation.reduce(Validation.concat, Success.empty(), validations) // => Validation<Person>
-  .chain(updatePerson) // => Validation<Response>
+  .chain(createPerson) // => Validation<Response>
   .ifSuccess(doSomethingWithResponse)
   .orElse(each(console.error)); // Log all errors</code></pre>
     
@@ -1077,7 +1083,7 @@ Validation.reduce(Validation.concat, Success.empty(), validations) // => Validat
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line413">line 413</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line419">line 419</a>
         </div>
         
     </div>
@@ -1088,7 +1094,7 @@ Validation.reduce(Validation.concat, Success.empty(), validations) // => Validat
     
     
     <div class="description">
-        Concatenates another <code>Validation</code> instance with the current instance.
+        Concatenates another <a href="Validation.html"><code>Validation</code></a> instance with the current instance.
     </div>
     
 
@@ -1135,7 +1141,7 @@ Validation.reduce(Validation.concat, Success.empty(), validations) // => Validat
             
             <td class="description last">
                 
-                Other <code>Validation</code> to concatenation.</td>
+                Other <a href="Validation.html"><code>Validation</code></a> to concatenation.</td>
         </tr>
 	
 	
@@ -1307,7 +1313,7 @@ Validation.reduce(Validation.concat, Success.empty(), validations) // => Validat
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line492">line 492</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line498">line 498</a>
         </div>
         
     </div>
@@ -1473,16 +1479,16 @@ Validation.reduce(Validation.concat, Success.empty(), validations) // => Validat
             
 <dt>
     <div class="nameContainer inherited">
-        <h4 class="name" id="ifSuccess">
+        <h4 class="name" id="extend">
             
-                <span class="inherited"><a href="Validation.html#ifSuccess">inherited</a></span>
+                <span class="inherited"><a href="Validation.html#extend">inherited</a></span>
             
-            <span class="type-signature ">abstract</span>ifSuccess<span class="signature">(method)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Validation.html">Validation</a>}</span>
+            <span class="type-signature ">abstract</span>extend<span class="signature">(method)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Validation.html">Validation</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line496">line 496</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line407">line 407</a>
         </div>
         
     </div>
@@ -1493,8 +1499,157 @@ Validation.reduce(Validation.concat, Success.empty(), validations) // => Validat
     
     
     <div class="description">
-        Applies the provided function to the value contain for a <code>Success</code>. Any return value from the function
-is ignored. If the instance is a <code>Failure</code>, the function is ignored and the instance is returned.
+        Applies the provided function to the instance of <a href="Success.html"><code>Success</code></a>. The function should return the value wrapped
+in a <a href="Validation.html"><code>Validation</code></a>. If the instance is a <a href="Failure.html"><code>Failure</code></a>, the function is ignored and then instance is
+returned unchanged.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>method</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Extend">Extend</a>.&lt;<a href="Validation.html">Validation</a>></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                The function to invoke with the instance.</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Validation.html">Validation</a>
+                        
+                    
+            </td>
+            <td class="description last"><a href="Validation.html"><code>Validation</code></a> wrapped value returned by the provided <code>method</code>.</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="ifSuccess">
+            
+                <span class="inherited"><a href="Validation.html#ifSuccess">inherited</a></span>
+            
+            <span class="type-signature ">abstract</span>ifSuccess<span class="signature">(method)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Validation.html">Validation</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line530">line 530</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Applies the provided function to the value contain for a <a href="Success.html"><code>Success</code></a>. Any return value from the function is
+ignored. If the instance is a <a href="Failure.html"><code>Failure</code></a>, the function is ignored and the instance is returned.
     </div>
     
 
@@ -1649,7 +1804,7 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line529">line 529</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line563">line 563</a>
         </div>
         
     </div>
@@ -1660,7 +1815,7 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
     
     
     <div class="description">
-        Determines whether or not the instance is a <code>Failure</code> or not.
+        Determines whether or not the instance is a <a href="Failure.html"><code>Failure</code></a>.
     </div>
     
 
@@ -1727,7 +1882,7 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
                         
                     
             </td>
-            <td class="description last"><code>true</code> if the instance is a <code>Failure</code>; <code>false</code> is not.</td>
+            <td class="description last"><code>true</code> if the instance is a <a href="Failure.html"><code>Failure</code></a>; <code>false</code> is not.</td>
         </tr>
     
     </tbody>
@@ -1770,7 +1925,7 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line546">line 546</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line580">line 580</a>
         </div>
         
     </div>
@@ -1781,7 +1936,7 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
     
     
     <div class="description">
-        Determines whether or not the instance is a <code>Success</code> or not.
+        Determines whether or not the instance is a <a href="Success.html"><code>Success</code></a>.
     </div>
     
 
@@ -1848,7 +2003,7 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
                         
                     
             </td>
-            <td class="description last"><code>true</code> if the instance is a <code>Success</code>; <code>false</code> is not.</td>
+            <td class="description last"><code>true</code> if the instance is a <a href="Success.html"><code>Success</code></a>; <code>false</code> is not.</td>
         </tr>
     
     </tbody>
@@ -1891,7 +2046,7 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line550">line 550</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line584">line 584</a>
         </div>
         
     </div>
@@ -1902,9 +2057,9 @@ is ignored. If the instance is a <code>Failure</code>, the function is ignored a
     
     
     <div class="description">
-        Applies the provided function to the value contained for a <code>Success</code> which is, in turn, wrapped in a
-<code>Success</code>. If the instance is a <code>Failure</code>, the function is ignored and then instance is
-returned unchanged.
+        Applies the provided function to the value contained for a <a href="Success.html"><code>Success</code></a> which is, in turn, wrapped in a
+<a href="Success.html"><code>Success</code></a>. If the instance is a <a href="Failure.html"><code>Failure</code></a>, the function is ignored and then instance is returned
+unchanged.
     </div>
     
 
@@ -2016,7 +2171,7 @@ returned unchanged.
                         
                     
             </td>
-            <td class="description last"><code>Validation</code> wrapped value mapped with the provided <code>method</code>.</td>
+            <td class="description last"><a href="Validation.html"><code>Validation</code></a> wrapped value mapped with the provided <code>method</code>.</td>
         </tr>
     
     </tbody>
@@ -2052,7 +2207,7 @@ Failure.from(error).map(flow(sort, join(", ")));
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line572">line 572</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line606">line 606</a>
         </div>
         
     </div>
@@ -2128,7 +2283,7 @@ Failure.from(error).map(flow(sort, join(", ")));
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line576">line 576</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line610">line 610</a>
         </div>
         
     </div>
@@ -2139,8 +2294,8 @@ Failure.from(error).map(flow(sort, join(", ")));
     
     
     <div class="description">
-        Applies the provided function to the value contain for a <code>Failure</code>. Any return value from the function
-is ignored. If the instance is a <code>Success</code>, the function is ignored and the instance is returned.
+        Applies the provided function to the value contain for a <a href="Failure.html"><code>Failure</code></a>. Any return value from the function is
+ignored. If the instance is a <a href="Success.html"><code>Success</code></a>, the function is ignored and the instance is returned.
     </div>
     
 
@@ -2295,7 +2450,7 @@ is ignored. If the instance is a <code>Success</code>, the function is ignored a
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line596">line 596</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line630">line 630</a>
         </div>
         
     </div>
@@ -2306,9 +2461,8 @@ is ignored. If the instance is a <code>Success</code>, the function is ignored a
     
     
     <div class="description">
-        Applies the provided function to the value contain for a <code>Failure</code> and throws the resulting
-<code>Error</code>. If the instance is a <code>Success</code>, the function is ignored and the instance is
-returned.
+        Applies the provided function to the value contain for a <a href="Failure.html"><code>Failure</code></a> and throws the resulting
+<code>Error</code>. If the instance is a <a href="Success.html"><code>Success</code></a>, the function is ignored and the instance is returned.
     </div>
     
 
@@ -2461,7 +2615,7 @@ returned.
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line617">line 617</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line650">line 650</a>
         </div>
         
     </div>
@@ -2472,8 +2626,8 @@ returned.
     
     
     <div class="description">
-        Converts the validation to a <code>Promise</code>. <code>Success</code>es are <code>resolve</code>d and
-<code>Failure</code>s are <code>reject</code>ed.
+        Converts the validation to a <code>Promise</code>. <a href="Success.html"><code>Success</code></a> becomes <code>resolve</code> and
+<a href="Failure.html"><code>Failure</code></a> becomes <code>reject</code>.
     </div>
     
 
@@ -2583,7 +2737,7 @@ returned.
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line636">line 636</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line669">line 669</a>
         </div>
         
     </div>
@@ -2595,7 +2749,6 @@ returned.
     
     <div class="description">
         Converts the validation to a <code>Promise</code> using the provided <code>Promise</code> implementation.
-<code>Success</code>es are <code>resolve</code>d and <code>Failure</code>s are <code>reject</code>ed.
     </div>
     
 
@@ -2754,7 +2907,7 @@ Failure.from(error).toPromiseWith(Bluebird);
     
         
         <div class="tag-source">
-            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line660">line 660</a>
+            <a href="data_Validation.js.html">data/Validation.js</a>, <a href="data_Validation.js.html#line692">line 692</a>
         </div>
         
     </div>
@@ -2765,7 +2918,7 @@ Failure.from(error).toPromiseWith(Bluebird);
     
     
     <div class="description">
-        Returns a <code>String</code> representation of the <code>Validation</code>.
+        Returns a <code>String</code> representation of the <a href="Validation.html"><code>Validation</code></a>.
     </div>
     
 
@@ -2879,7 +3032,7 @@ Failure.from(error).toPromiseWith(Bluebird);
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jun 02 2016 13:54:13 GMT-0500 (CDT)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Jun 24 2016 08:08:45 GMT-0500 (CDT)
         </footer>
     </div>
 </div>

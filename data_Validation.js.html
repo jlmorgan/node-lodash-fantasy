@@ -26,7 +26,7 @@
     
     
     <script>
-    var config = {"monospaceLinks":false,"cleverLinks":false,"applicationName":"lodash-fantasy","collapseSymbols":false,"default":{"outputSourceFiles":true},"linenums":true,"meta":{"description":"Fantasy Land compatible types built with lodash.","title":"Lodash Fantasy"},"openGraph":{"type":"website"}};
+    var config = {"monospaceLinks":true,"cleverLinks":false,"applicationName":"lodash-fantasy","collapseSymbols":false,"default":{"outputSourceFiles":true},"linenums":true,"meta":{"description":"Fantasy Land compatible types built with lodash.","title":"Lodash Fantasy"},"openGraph":{"type":"website"}};
     </script>
     
 
@@ -69,6 +69,8 @@
                 <li data-name="Failure#concat"><a href="Failure.html#concat">concat</a></li>
             
                 <li data-name="Failure#equals"><a href="Failure.html#equals">equals</a></li>
+            
+                <li data-name="Failure#extend"><a href="Failure.html#extend">extend</a></li>
             
                 <li data-name="Failure#ifSuccess"><a href="Failure.html#ifSuccess">ifSuccess</a></li>
             
@@ -122,6 +124,8 @@
                 <li data-name="Success#concat"><a href="Success.html#concat">concat</a></li>
             
                 <li data-name="Success#equals"><a href="Success.html#equals">equals</a></li>
+            
+                <li data-name="Success#extend"><a href="Success.html#extend">extend</a></li>
             
                 <li data-name="Success#ifSuccess"><a href="Success.html#ifSuccess">ifSuccess</a></li>
             
@@ -216,6 +220,10 @@
             
                 <li data-name="Validation#equals"><a href="Validation.html#equals">equals</a></li>
             
+                <li data-name="Validation#extend"><a href="Validation.html#extend">extend</a></li>
+            
+                <li data-name="Validation#extend"><a href="Validation.html#extend">extend</a></li>
+            
                 <li data-name="Validation#ifSuccess"><a href="Validation.html#ifSuccess">ifSuccess</a></li>
             
                 <li data-name="Validation#isFailure"><a href="Validation.html#isFailure">isFailure</a></li>
@@ -292,13 +300,24 @@ const invokeIn = curryN(3, (methodName, value, source) => source[methodName](val
 const invokeWith = curryN(3, (methodName, source, value) => source[methodName](value));
 
 /**
- * The &lt;code>Validation&lt;/code> type is intended for validating values and aggregating failures. It is a disjunction
- * similar to &lt;code>Either&lt;/code>. The key difference of the &lt;code>Validation&lt;/code> type is the focus on failure
+ * The {@link Validation} type is intended for validating values and aggregating failures. It is a disjunction
+ * similar to &lt;code>Either&lt;/code>. The key difference of the {@link Validation} type is the focus on failure
  * aggregation as opposed to failing once and ignoring all other failures. Much like &lt;code>Either&lt;/code>,
- * &lt;code>Validation&lt;/code> is right-biased.
+ * {@link Validation} is right-biased.
  *
- * @class
- * @example &lt;caption>Value validation function&lt;/caption>
+ * @param {*} value - Value to wrap.
+ * @return {Validation} {@link Validation} wrapped &lt;code>value&lt;/code>.
+ * @example &lt;caption>Via &lt;code>new&lt;/code>&lt;/caption>
+ *
+ * const v1 = new Success(value);
+ * const v2 = new Failure(message);
+ *
+ * @example &lt;caption>Via function&lt;/caption>
+ *
+ * const v3 = Success.from(value);
+ * const v4 = Failure.from(message);
+ *
+ * @example &lt;caption>Via validation function&lt;/caption>
  *
  * const isEmpty = require("lodash/fp/isEmpty");
  * const isString = require("lodash/fp/isString");
@@ -312,7 +331,7 @@ const invokeWith = curryN(3, (methodName, source, value) => source[methodName](v
  *
  * module.exports = validateStringPresence;
  *
- * @example &lt;caption>Abstract validation rule&lt;/caption>
+ * @example &lt;caption>Via abstract validation rule&lt;/caption>
  *
  * const Validation = require("lodash-fantasy/data/Validation");
  *
@@ -338,14 +357,14 @@ class Validation {
   }
 
   /**
-   * Returns a &lt;code>Validation&lt;/code> that resolves all of the validations in the collection into a single validation.
-   * Unlike &lt;code>Promise&lt;/code>, &lt;code>Validation.all&lt;/code> aggregates all of the failures into a single instance of
-   * &lt;code>Validation&lt;/code>. However, like &lt;code>Promise&lt;/code>, &lt;code>Validation.all&lt;/code> collects all of the values
-   * for &lt;code>Success&lt;/code>es when &lt;em>all&lt;/em> items in the collection are a &lt;code>Success&lt;/code>.
+   * Returns a {@link Validation} that resolves all of the validations in the collection into a single validation.
+   * Unlike &lt;code>Promise&lt;/code>, {@link Validation.all} aggregates all of the failures into a single instance of
+   * {@link Validation}. However, like &lt;code>Promise&lt;/code>, {@link Validation.all} collects all of the values
+   * for successes when &lt;em>all&lt;/em> items in the collection are a {@link Success}.
    * @static
    * @member
    * @param {Validation[]} validations - Collection of validations.
-   * @return {Validation} A &lt;code>Validation&lt;/code> representing all &lt;code>Success&lt;/code> or &lt;code>Failure&lt;/code>
+   * @return {Validation} A {@link Validation} representing all {@link Success} or {@link Failure}
    * values.
    * @example
    *
@@ -377,11 +396,11 @@ class Validation {
   }
 
   /**
-   * Returns the first &lt;code>Success&lt;/code> in the collection or a single &lt;code>Failure&lt;/code> for all failures.
+   * Returns the first {@link Success} in the collection or a single {@link Failure} for all failures.
    * @static
    * @member
    * @param {Validation[]} validations - Collection of validations.
-   * @return {Validation} First &lt;code>Success&lt;/code> or reduced &lt;code>Failure&lt;/code>s.
+   * @return {Validation} First {@link Success} or reduced {@link Failure}s.
    * @example
    *
    * const v1 = validationPropertyAIn(context1);
@@ -411,10 +430,10 @@ class Validation {
   }
 
   /**
-   * Creates an empty &lt;code>Success&lt;/code>.
+   * Creates an empty {@link Success}.
    * @static
    * @member
-   * @return {Success} Empty &lt;code>Success&lt;/code> instance.
+   * @return {Success} Empty {@link Success} instance.
    * @example
    *
    * const v1 = Validation.empty();
@@ -425,11 +444,11 @@ class Validation {
   }
 
   /**
-   * Determines whether or not the value is a &lt;code>Failure&lt;/code>.
+   * Determines whether or not the value is a {@link Failure}.
    * @static
    * @member
    * @param {*} value - Value to check.
-   * @return {Boolean} &lt;code>true&lt;/code> for &lt;code>Failure&lt;/code>; &lt;code>false&lt;/code> for &lt;code>Success&lt;/code>.
+   * @return {Boolean} &lt;code>true&lt;/code> for {@link Failure}; &lt;code>false&lt;/code> for {@link Success}.
    * @example
    *
    * isFailure();
@@ -449,11 +468,11 @@ class Validation {
   }
 
   /**
-   * Determines whether or not the value is a &lt;code>Success&lt;/code>.
+   * Determines whether or not the value is a {@link Success}.
    * @static
    * @member
    * @param {*} value - Value to check.
-   * @return {Boolean} &lt;code>true&lt;/code> for &lt;code>Success&lt;/code>; &lt;code>false&lt;/code> for &lt;code>Failure&lt;/code>.
+   * @return {Boolean} &lt;code>true&lt;/code> for {@link Success}; &lt;code>false&lt;/code> for {@link Failure}.
    * @example
    *
    * isSuccess();
@@ -473,11 +492,11 @@ class Validation {
   }
 
   /**
-   * Determines whether or not the value is a &lt;code>Validation&lt;/code>.
+   * Determines whether or not the value is a {@link Validation}.
    * @static
    * @member
    * @param {*} value - Value to check.
-   * @return {Boolean} &lt;code>true&lt;/code> for &lt;code>Validation&lt;/code>; &lt;code>false&lt;/code> for anything else.
+   * @return {Boolean} &lt;code>true&lt;/code> for {@link Validation}; &lt;code>false&lt;/code> for anything else.
    * @example
    *
    * isValidation();
@@ -497,14 +516,14 @@ class Validation {
   }
 
   /**
-   * Creates a new &lt;code>Validation&lt;/code> from a &lt;code>value&lt;/code>. If the &lt;code>value&lt;/code> is already a
-   * &lt;code>Validation&lt;/code> instance, the &lt;code>value&lt;/code> is returned unchanged. Otherwise, a new
-   * &lt;code>Success&lt;/code> is made with the &lt;code>value&lt;/code>.
+   * Creates a new {@link Validation} from a &lt;code>value&lt;/code>. If the &lt;code>value&lt;/code> is already a
+   * {@link Validation} instance, the &lt;code>value&lt;/code> is returned unchanged. Otherwise, a new
+   * {@link Success} is made with the &lt;code>value&lt;/code>.
    * @static
    * @member
-   * @param {*} value - Value to wrap in a &lt;code>Validation&lt;/code>.
-   * @return {Validation} &lt;code>Validation&lt;/code> when is the &lt;code>value&lt;/code> already wrapped or
-   * &lt;code>Success&lt;/code> wrapped &lt;code>value&lt;/code>.
+   * @param {*} value - Value to wrap in a {@link Validation}.
+   * @return {Validation} {@link Validation} when is the &lt;code>value&lt;/code> already wrapped or
+   * {@link Success} wrapped &lt;code>value&lt;/code>.
    *
    * Validation.from();
    * // => Success()
@@ -523,11 +542,11 @@ class Validation {
   }
 
   /**
-   * Wraps the &lt;code>value&lt;/code> in a &lt;code>Success&lt;/code>. No parts of &lt;code>value&lt;/code> are checked.
+   * Wraps the &lt;code>value&lt;/code> in a {@link Success}. No parts of &lt;code>value&lt;/code> are checked.
    * @static
    * @member
    * @param {*} value - Value to wrap.
-   * @return {Success} &lt;code>Success&lt;/code> wrapped &lt;code>value&lt;/code>.
+   * @return {Success} {@link Success} wrapped &lt;code>value&lt;/code>.
    * @example
    *
    * Validation.of();
@@ -548,13 +567,12 @@ class Validation {
 
   /**
    * Tries to invoke a &lt;code>supplier&lt;/code>. The result of the &lt;code>supplier&lt;/code> is returned in a
-   * &lt;code>Success&lt;/code>. If an exception is thrown, the error is returned in a &lt;code>Failure&lt;/code>. The
-   * &lt;code>function&lt;/code> takes no arguments.
+   * {@link Success}. If an exception is thrown, the error is returned in a {@link Failure}. The &lt;code>function&lt;/code>
+   * takes no arguments.
    * @static
    * @member
    * @param {Supplier} supplier - Function to invoke.
-   * @return {Validation} &lt;code>Success&lt;/code> wrapped &lt;code>method&lt;/code> or &lt;code>Failure&lt;/code> wrapped
-   * &lt;code>error&lt;/code>.
+   * @return {Validation} {@link Success} wrapped supplier result or {@link Failure} wrapped &lt;code>error&lt;/code>.
    * @example
    *
    * Validation.try(normalFunction);
@@ -571,36 +589,21 @@ class Validation {
     }
   }
 
-  /**
-   * Creates a &lt;code>Validation&lt;/code> instance. Use &lt;code>Failure&lt;/code> or &lt;code>Success&lt;/code>.
-   * @param {*} value - Value to wrap.
-   * @return {Validation} &lt;code>Validation&lt;/code> wrapped &lt;code>value&lt;/code>.
-   * @example &lt;caption>Via &lt;code>new&lt;/code>&lt;/caption
-   *
-   * const v1 = new Success(value);
-   * const v2 = new Failure(message);
-   *
-   * @example &lt;caption>Via functions&lt;/caption>
-   *
-   * const v3 = Success.from(value);
-   * const v4 = Failure.from(message);
-   */
   constructor(value) {
     this.value = value;
   }
 
   /**
-   * Applies the function contained in the instance of a &lt;code>Success&lt;/code> to the value contained in the provided
-   * &lt;code>Success&lt;/code>, producing a &lt;code>Success&lt;/code> containing the result. If the instance is
-   * &lt;code>Failure&lt;/code>, the result will be the the &lt;code>Failure&lt;/code> instance. If the instance is
-   * &lt;code>Success&lt;/code> and the provided validation is &lt;code>Failure&lt;/code>, the result is the provided
-   * &lt;code>Failure&lt;/code>.
+   * Applies the function contained in the instance of a {@link Success} to the value contained in the provided
+   * {@link Success}, producing a {@link Success} containing the result. If the instance is {@link Failure}, the result
+   * is a {@link Failure} instance. If the instance is {@link Success} and the provided validation is {@link Failure},
+   * the result is the provided {@link Failure}.
    * @abstract
    * @function ap
    * @memberof Validation
    * @instance
-   * @param {Validation} other - Value to apply to the function wrapped in the &lt;code>Success&lt;/code>.
-   * @return {Validation} &lt;code>Success&lt;/code> wrapped applied function or &lt;code>Failure&lt;/code>.
+   * @param {Validation} other - Value to apply to the function wrapped in the {@link Success}.
+   * @return {Validation} {@link Success} wrapped applied function or {@link Failure}.
    * @example &lt;caption>Success#ap&lt;/caption>
    *
    * const createPerson = curryN(4, Person.create); // Person.create(name, birthdate, address, email)
@@ -615,16 +618,15 @@ class Validation {
    */
 
   /**
-   * Transforms a &lt;code>Validation&lt;/code> by applying the first function to the contained value for a
-   * &lt;code>Failure&lt;/code> or the second function for a &lt;code>Success&lt;/code>. The result of each map is wrapped in the
-   * corresponding type.
+   * Transforms a {@link Validation} by applying the first function to the contained value for a {@link Failure} or the
+   * second function for a {@link Success}. The result of each map is wrapped in the corresponding type.
    * @abstract
    * @function bimap
    * @memberof Validation
    * @instance
-   * @param {Function} failureMap - Map to apply to the &lt;code>Failure&lt;/code>.
-   * @param {Function} successMap - Map to apply to the &lt;code>Success&lt;/code>.
-   * @return {Validation} &lt;code>Validation&lt;/code> wrapped value mapped with the corresponding mapping function.
+   * @param {Function} failureMap - Map to apply to the {@link Failure}.
+   * @param {Function} successMap - Map to apply to the {@link Success}.
+   * @return {Validation} {@link Validation} wrapped value mapped with the corresponding mapping function.
    * @example
    *
    * validateRequest(request)
@@ -633,15 +635,15 @@ class Validation {
    */
 
   /**
-   * Applies the provided function to the value contained for a &lt;code>Success&lt;/code>. The function should return the
-   * value wrapped in a &lt;code>Validation&lt;/code>. If the instance is a &lt;code>Failure&lt;/code>, the function is ignored and
-   * then instance is returned unchanged.
+   * Applies the provided function to the value contained for a {@link Success}. The function should return the value
+   * wrapped in a {@link Validation}. If the instance is a {@link Failure}, the function is ignored and then instance is
+   * returned unchanged.
    * @abstract
    * @function chain
    * @memberof Validation
    * @instance
    * @param {Chain.&lt;Validation>} method - The function to invoke with the value.
-   * @return {Validation} &lt;code>Validation&lt;/code> wrapped value returned by the provided &lt;code>method&lt;/code>.
+   * @return {Validation} {@link Validation} wrapped value returned by the provided &lt;code>method&lt;/code>.
    * @example &lt;caption>Success#chain&lt;/caption>
    *
    * const person = { ... };
@@ -649,7 +651,7 @@ class Validation {
    *   Success(response) :
    *   Failure(response.statusMessage);
    *
-   * const updatePerson = flow(Person.update, validateResponse); // Expects instance of Person
+   * const createPerson = flow(Person.create, validateResponse); // Expects instance of Person
    *
    * const validations = [
    *   validatePersonName(person), // => Success(person)
@@ -659,18 +661,30 @@ class Validation {
    * ];
    *
    * Validation.reduce(Validation.concat, Success.empty(), validations) // => Validation&lt;Person>
-   *   .chain(updatePerson) // => Validation&lt;Response>
+   *   .chain(createPerson) // => Validation&lt;Response>
    *   .ifSuccess(doSomethingWithResponse)
    *   .orElse(each(console.error)); // Log all errors
    */
 
   /**
-   * Concatenates another &lt;code>Validation&lt;/code> instance with the current instance.
+   * Applies the provided function to the instance of {@link Success}. The function should return the value wrapped
+   * in a {@link Validation}. If the instance is a {@link Failure}, the function is ignored and then instance is
+   * returned unchanged.
+   * @abstract
+   * @function extend
+   * @memberof Validation
+   * @instance
+   * @param {Extend.&lt;Validation>} method - The function to invoke with the instance.
+   * @return {Validation} {@link Validation} wrapped value returned by the provided &lt;code>method&lt;/code>.
+   */
+
+  /**
+   * Concatenates another {@link Validation} instance with the current instance.
    * @abstract
    * @function concat
    * @memberof Validation
    * @instance
-   * @param {Validation} other - Other &lt;code>Validation&lt;/code> to concatenation.
+   * @param {Validation} other - Other {@link Validation} to concatenation.
    * @return {Validation} Concatenated validations.
    * @example &lt;caption>Empty Success with Empty Success&lt;/caption>
    *
@@ -748,8 +762,36 @@ class Validation {
   }
 
   /**
-   * Applies the provided function to the value contain for a &lt;code>Success&lt;/code>. Any return value from the function
-   * is ignored. If the instance is a &lt;code>Failure&lt;/code>, the function is ignored and the instance is returned.
+   * Extends the validation.
+   * @abstract
+   * @function extend
+   * @memberof Validation
+   * @instance
+   * @param {Extend.&lt;Validation>} - method - The function to invoke with the value.
+   * @return {Validation}
+   * @example &lt;caption>Workflow continuation&lt;/caption>
+   *
+   * const request = require("request");
+   *
+   * // Workflow from savePerson.js
+   * const savePerson = curry((requestOptions, validatedPerson) => {
+   *   return validatedPerson
+   *     .map(Person.from)
+   *     .map(person => set("body", person, requestOptions))
+   *     .map(request);
+   * });
+   *
+   * // Workflow from processResponse.js
+   * const processResponse = validatedResponse => validatedResponse.ifSuccess(console.log);
+   *
+   * validatePerson(person)
+   *   .extend(savePerson({ method: "POST" }))
+   *   .extend(processResponse);
+   */
+
+  /**
+   * Applies the provided function to the value contain for a {@link Success}. Any return value from the function is
+   * ignored. If the instance is a {@link Failure}, the function is ignored and the instance is returned.
    * @abstract
    * @function ifSuccess
    * @memberof Validation
@@ -768,8 +810,8 @@ class Validation {
    */
 
   /**
-   * Determines whether or not the instance is a &lt;code>Failure&lt;/code> or not.
-   * @return {Boolean} &lt;code>true&lt;/code> if the instance is a &lt;code>Failure&lt;/code>; &lt;code>false&lt;/code> is not.
+   * Determines whether or not the instance is a {@link Failure}.
+   * @return {Boolean} &lt;code>true&lt;/code> if the instance is a {@link Failure}; &lt;code>false&lt;/code> is not.
    * @example &lt;caption>Success#isFailure&lt;/caption>
    *
    * Success.from(value).isFailure();
@@ -785,8 +827,8 @@ class Validation {
   }
 
   /**
-   * Determines whether or not the instance is a &lt;code>Success&lt;/code> or not.
-   * @return {Boolean} &lt;code>true&lt;/code> if the instance is a &lt;code>Success&lt;/code>; &lt;code>false&lt;/code> is not.
+   * Determines whether or not the instance is a {@link Success}.
+   * @return {Boolean} &lt;code>true&lt;/code> if the instance is a {@link Success}; &lt;code>false&lt;/code> is not.
    * @example &lt;caption>Success&lt;/caption>
    *
    * Success.from(value).isFailure();
@@ -802,15 +844,15 @@ class Validation {
   }
 
   /**
-   * Applies the provided function to the value contained for a &lt;code>Success&lt;/code> which is, in turn, wrapped in a
-   * &lt;code>Success&lt;/code>. If the instance is a &lt;code>Failure&lt;/code>, the function is ignored and then instance is
-   * returned unchanged.
+   * Applies the provided function to the value contained for a {@link Success} which is, in turn, wrapped in a
+   * {@link Success}. If the instance is a {@link Failure}, the function is ignored and then instance is returned
+   * unchanged.
    * @abstract
    * @function map
    * @memberof Validation
    * @instance
    * @param {Function} method - The function to invoke with the value.
-   * @return {Validation} &lt;code>Validation&lt;/code> wrapped value mapped with the provided &lt;code>method&lt;/code>.
+   * @return {Validation} {@link Validation} wrapped value mapped with the provided &lt;code>method&lt;/code>.
    * @example
    *
    * Success.from([1, 3, 2]).map(flow(sort, join(", ")));
@@ -828,8 +870,8 @@ class Validation {
   }
 
   /**
-   * Applies the provided function to the value contain for a &lt;code>Failure&lt;/code>. Any return value from the function
-   * is ignored. If the instance is a &lt;code>Success&lt;/code>, the function is ignored and the instance is returned.
+   * Applies the provided function to the value contain for a {@link Failure}. Any return value from the function is
+   * ignored. If the instance is a {@link Success}, the function is ignored and the instance is returned.
    * @abstract
    * @function orElse
    * @memberof Validation
@@ -848,9 +890,8 @@ class Validation {
    */
 
   /**
-   * Applies the provided function to the value contain for a &lt;code>Failure&lt;/code> and throws the resulting
-   * &lt;code>Error&lt;/code>. If the instance is a &lt;code>Success&lt;/code>, the function is ignored and the instance is
-   * returned.
+   * Applies the provided function to the value contain for a {@link Failure} and throws the resulting
+   * &lt;code>Error&lt;/code>. If the instance is a {@link Success}, the function is ignored and the instance is returned.
    * @abstract
    * @function orElseThrow
    * @memberof Validation
@@ -869,8 +910,8 @@ class Validation {
    */
 
   /**
-   * Converts the validation to a &lt;code>Promise&lt;/code>. &lt;code>Success&lt;/code>es are &lt;code>resolve&lt;/code>d and
-   * &lt;code>Failure&lt;/code>s are &lt;code>reject&lt;/code>ed.
+   * Converts the validation to a &lt;code>Promise&lt;/code>. {@link Success} becomes &lt;code>resolve&lt;/code> and
+   * {@link Failure} becomes &lt;code>reject&lt;/code>.
    * @abstract
    * @function toPromise
    * @memberof Validation
@@ -889,7 +930,6 @@ class Validation {
 
   /**
    * Converts the validation to a &lt;code>Promise&lt;/code> using the provided &lt;code>Promise&lt;/code> implementation.
-   * &lt;code>Success&lt;/code>es are &lt;code>resolve&lt;/code>d and &lt;code>Failure&lt;/code>s are &lt;code>reject&lt;/code>ed.
    * @abstract
    * @function toPromiseWith
    * @memberof Validation
@@ -912,7 +952,7 @@ class Validation {
    */
 
   /**
-   * Returns a &lt;code>String&lt;/code> representation of the &lt;code>Validation&lt;/code>.
+   * Returns a &lt;code>String&lt;/code> representation of the {@link Validation}.
    * @abstract
    * @function toString
    * @memberof Validation
@@ -931,7 +971,7 @@ class Validation {
 }
 
 /**
- * Concatenates two &lt;code>Validation&lt;/code> instances together.
+ * Concatenates two {@link Validation} instances together.
  * @static
  * @member
  * @param {Validation} left - Left concatenation value.
@@ -954,12 +994,12 @@ Validation.concat = invokeWith("concat");
 /**
  * Iterates over a collection of validations and invokes the &lt;code>iteratee&lt;/code> for each validation. The
  * &lt;code>iteratee&lt;/code> is invoked with one argument: &lt;code>(validation)&lt;/code>. Iteratee functions may exit iteration
- * early by explicitly returning a &lt;code>Failure&lt;/code>.
+ * early by explicitly returning a {@link Failure}.
  * @static
  * @member
  * @param {Consumer} iteratee - The function to invoke per iteration.
  * @param {Validation[]} validations - Collection of validations over which to iterate.
- * @return {Validation[]} Current &lt;code>Validation&lt;/code> collection.
+ * @return {Validation[]} Current {@link Validation} collection.
  * @example
  *
  * const validations = [
@@ -1010,7 +1050,7 @@ Validation.equals = isEqual;
  * @member
  * @param {Predicate} predicate - The function to invoke per iteration.
  * @param {Validations[]} validations - Collection of validations over which to iterate.
- * @return {Validations[]} Filtered &lt;code>Validation&lt;/code> collection.
+ * @return {Validations[]} Filtered {@link Validation} collection.
  * @example &lt;caption>Filter and log failures&lt;/caption>
  *
  * const validations = [
@@ -1029,13 +1069,13 @@ Validation.equals = isEqual;
 Validation.filter = filter;
 
 /**
- * Creates an array of values by invoking &lt;code>Validation#map&lt;/code> with the &lt;code>iteratee&lt;/code> for each
- * &lt;code>Validation&lt;/code> in the collection. The iteratee is invoked with one argument: &lt;code>(value)&lt;/code>.
+ * Creates an array of values by invoking {@link Validation#map} with the &lt;code>iteratee&lt;/code> for each
+ * {@link Validation} in the collection. The iteratee is invoked with one argument: &lt;code>(value)&lt;/code>.
  * @static
  * @member
  * @param {Function} iteratee - The function to invoke per iteration.
  * @param {Validation[]} validations - Collection of validations over which to iterate.
- * @return {Validation[]} Mapped &lt;code>Validation&lt;/code> collection.
+ * @return {Validation[]} Mapped {@link Validation} collection.
  * @example &lt;caption>Mapping each Validation's value&lt;/caption>
  *
  * const validations = [
@@ -1051,8 +1091,8 @@ Validation.filter = filter;
 Validation.mapIn = curry((iteratee, validations) => map(invokeIn("map", iteratee), validations));
 
 /**
- * Creates an array of values by running each &lt;code>Validation&lt;/code> in collection through the &lt;code>iteratee&lt;/code>.
- * The iteratee is invoked with one argument: &lt;code>(validation)&lt;/code>.
+ * Creates an array of values by running each {@link Validation} in collection through the &lt;code>iteratee&lt;/code>. The
+ * iteratee is invoked with one argument: &lt;code>(validation)&lt;/code>.
  * @static
  * @member
  * @param {Function} iteratee - The function to invoke per iteration.
@@ -1097,7 +1137,8 @@ Validation.map = map;
 Validation.reduce = reduce;
 
 /**
- * Converts a &lt;code>Validation&lt;/code> to a &lt;code>Promise&lt;/code>. Successes are resolved and Failures are rejected.
+ * Converts a {@link Validation} to a &lt;code>Promise&lt;/code>. {@link Success} becomes &lt;code>resolve&lt;/code> and
+ * {@link Failure} becomes &lt;code>reject&lt;/code>.
  * @static
  * @member
  * @param {Validation} value - Validation to convert.
@@ -1116,7 +1157,6 @@ Validation.toPromise = invoke("toPromise");
 
 /**
  * Converts a validation to a &lt;code>Promise&lt;/code> using the provided &lt;code>Promise&lt;/code> implementation.
- * &lt;code>Success&lt;/code>es are &lt;code>resolve&lt;/code>d and &lt;code>Failure&lt;/code>s are &lt;code>reject&lt;/code>ed.
  * @static
  * @member
  * @param {Promise} promise - Promise implementation.
@@ -1135,19 +1175,18 @@ Validation.toPromise = invoke("toPromise");
 Validation.toPromiseWith = invokeIn("toPromise");
 
 /**
- * @class
  * @extends Validation
  * @inheritdoc
  */
 class Failure extends Validation {
   /**
-   * Creates a new &lt;code>Failure&lt;/code> from a &lt;code>value&lt;/code>. If the &lt;code>value&lt;/code> is already a
-   * &lt;code>Validation&lt;/code> instance, the &lt;code>value&lt;/code> is returned unchanged. Otherwise, a new
-   * &lt;code>Failure&lt;/code> is made with the &lt;code>value&lt;/code>.
+   * Creates a new {@link Failure} from a &lt;code>value&lt;/code>. If the &lt;code>value&lt;/code> is already a {@link Validation}
+   * instance, the &lt;code>value&lt;/code> is returned unchanged. Otherwise, a new {@link Failure} is made with the
+   * &lt;code>value&lt;/code>.
    * @static
-   * @param {*} value - Value to wrap in a &lt;code>Failure&lt;/code>.
-   * @return {Validation} &lt;code>Validation&lt;/code> when is the &lt;code>value&lt;/code> already wrapped or
-   * &lt;code>Failure&lt;/code> wrapped &lt;code>value&lt;/code>.
+   * @param {*} value - Value to wrap in a {@link Failure}.
+   * @return {Validation} {@link Validation} when is the &lt;code>value&lt;/code> already wrapped or
+   * {@link Failure} wrapped &lt;code>value&lt;/code>.
    * @example &lt;caption>Failure from empty array&lt;/caption>
    *
    * Failure.from();
@@ -1196,6 +1235,10 @@ class Failure extends Validation {
       new Failure(this.value.concat(other.value));
   }
 
+  extend() {
+    return this;
+  }
+
   ifSuccess() {
     return this;
   }
@@ -1228,19 +1271,18 @@ class Failure extends Validation {
 }
 
 /**
- * @class
  * @extends Validation
  * @inheritdoc
  */
 class Success extends Validation {
   /**
-   * Creates a new &lt;code>Success&lt;/code> from a &lt;code>value&lt;/code>. If the &lt;code>value&lt;/code> is already a
-   * &lt;code>Validation&lt;/code> instance, the &lt;code>value&lt;/code> is returned unchanged. Otherwise, a new
-   * &lt;code>Success&lt;/code> is made with the &lt;code>value&lt;/code>.
+   * Creates a new {@link Success} from a &lt;code>value&lt;/code>. If the &lt;code>value&lt;/code> is already a
+   * {@link Validation} instance, the &lt;code>value&lt;/code> is returned unchanged. Otherwise, a new
+   * {@link Success} is made with the &lt;code>value&lt;/code>.
    * @static
-   * @param {*} value - Value to wrap in a &lt;code>Success&lt;/code>.
-   * @return {Validation} &lt;code>Validation&lt;/code> when is the &lt;code>value&lt;/code> already wrapped or
-   * &lt;code>Success&lt;/code> wrapped &lt;code>value&lt;/code>.
+   * @param {*} value - Value to wrap in a {@link Success}.
+   * @return {Validation} {@link Validation} when is the &lt;code>value&lt;/code> already wrapped or
+   * {@link Success} wrapped &lt;code>value&lt;/code>.
    * @example &lt;caption>Success from nothing&lt;/caption>
    *
    * Success.from();
@@ -1287,6 +1329,10 @@ class Success extends Validation {
     return (other.isSuccess() &amp;&amp; !isUndefined(this.value)) ? this : other;
   }
 
+  extend(method) {
+    return Validation.from(method(this));
+  }
+
   ifSuccess(method) {
     method(this.value);
 
@@ -1331,7 +1377,7 @@ module.exports = Validation;
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jun 02 2016 13:54:13 GMT-0500 (CDT)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Jun 24 2016 08:08:45 GMT-0500 (CDT)
         </footer>
     </div>
 </div>

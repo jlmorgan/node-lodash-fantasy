@@ -26,7 +26,7 @@
     
     
     <script>
-    var config = {"monospaceLinks":false,"cleverLinks":false,"applicationName":"lodash-fantasy","collapseSymbols":false,"default":{"outputSourceFiles":true},"linenums":true,"meta":{"description":"Fantasy Land compatible types built with lodash.","title":"Lodash Fantasy"},"openGraph":{"type":"website"}};
+    var config = {"monospaceLinks":true,"cleverLinks":false,"applicationName":"lodash-fantasy","collapseSymbols":false,"default":{"outputSourceFiles":true},"linenums":true,"meta":{"description":"Fantasy Land compatible types built with lodash.","title":"Lodash Fantasy"},"openGraph":{"type":"website"}};
     </script>
     
 
@@ -69,6 +69,8 @@
                 <li data-name="Failure#concat"><a href="Failure.html#concat">concat</a></li>
             
                 <li data-name="Failure#equals"><a href="Failure.html#equals">equals</a></li>
+            
+                <li data-name="Failure#extend"><a href="Failure.html#extend">extend</a></li>
             
                 <li data-name="Failure#ifSuccess"><a href="Failure.html#ifSuccess">ifSuccess</a></li>
             
@@ -122,6 +124,8 @@
                 <li data-name="Success#concat"><a href="Success.html#concat">concat</a></li>
             
                 <li data-name="Success#equals"><a href="Success.html#equals">equals</a></li>
+            
+                <li data-name="Success#extend"><a href="Success.html#extend">extend</a></li>
             
                 <li data-name="Success#ifSuccess"><a href="Success.html#ifSuccess">ifSuccess</a></li>
             
@@ -215,6 +219,10 @@
                 <li data-name="Validation#concat"><a href="Validation.html#concat">concat</a></li>
             
                 <li data-name="Validation#equals"><a href="Validation.html#equals">equals</a></li>
+            
+                <li data-name="Validation#extend"><a href="Validation.html#extend">extend</a></li>
+            
+                <li data-name="Validation#extend"><a href="Validation.html#extend">extend</a></li>
             
                 <li data-name="Validation#ifSuccess"><a href="Validation.html#ifSuccess">ifSuccess</a></li>
             
@@ -324,7 +332,7 @@
     
         
         <div class="tag-source">
-            <a href="index.js.html">index.js</a>, <a href="index.js.html#line35">line 35</a>
+            <a href="index.js.html">index.js</a>, <a href="index.js.html#line3">line 3</a>
         </div>
         
     </div>
@@ -470,7 +478,7 @@ wrapped in the same type providing the <code>value</code>.
     
         
         <div class="tag-source">
-            <a href="index.js.html">index.js</a>, <a href="index.js.html#line3">line 3</a>
+            <a href="index.js.html">index.js</a>, <a href="index.js.html#line12">line 12</a>
         </div>
         
     </div>
@@ -579,6 +587,152 @@ wrapped in the same type providing the <code>value</code>.
                 
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="Extend">
+            
+            Extend<span class="signature">(instance)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Type.&lt;T>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="index.js.html">index.js</a>, <a href="index.js.html#line19">line 19</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        A unary <code>function</code> that takes a <code>Type</code> and returns a <code>value</code>
+wrapped in the same type.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>instance</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Type.&lt;T></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                Instance of <code>Type</code> on which to extend.</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Type.&lt;T>
+                        
+                    
+            </td>
+            <td class="description last"><code>value</code> wrapped in a <code>Type</code>.</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="Predicate">
             
             Predicate<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Boolean}</span>
@@ -586,7 +740,7 @@ wrapped in the same type providing the <code>value</code>.
     
         
         <div class="tag-source">
-            <a href="index.js.html">index.js</a>, <a href="index.js.html#line20">line 20</a>
+            <a href="index.js.html">index.js</a>, <a href="index.js.html#line38">line 38</a>
         </div>
         
     </div>
@@ -731,7 +885,7 @@ wrapped in the same type providing the <code>value</code>.
     
         
         <div class="tag-source">
-            <a href="index.js.html">index.js</a>, <a href="index.js.html#line10">line 10</a>
+            <a href="index.js.html">index.js</a>, <a href="index.js.html#line28">line 28</a>
         </div>
         
     </div>
@@ -900,7 +1054,7 @@ returns accumulated value.
     
         
         <div class="tag-source">
-            <a href="index.js.html">index.js</a>, <a href="index.js.html#line28">line 28</a>
+            <a href="index.js.html">index.js</a>, <a href="index.js.html#line46">line 46</a>
         </div>
         
     </div>
@@ -1004,7 +1158,7 @@ returns accumulated value.
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jun 02 2016 13:54:13 GMT-0500 (CDT)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Jun 24 2016 08:08:45 GMT-0500 (CDT)
         </footer>
     </div>
 </div>
