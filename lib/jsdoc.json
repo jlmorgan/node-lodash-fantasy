@@ -1,0 +1,42 @@
+{
+  "opts": {
+    "destination": "build/docs/",
+    "encoding": "utf8",
+    "recurse": true,
+    "template": "node_modules/jaguarjs-jsdoc"
+  },
+  "plugins": [],
+  "source": {
+    "excludePattern": "(^|\\/|\\\\)_",
+    "include": [
+      "README.md",
+      "index.js",
+      "data/"
+    ],
+    "includePattern": ".+\\.js(doc)?$"
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": [
+      "closure",
+      "jsdoc"
+    ]
+  },
+  "templates": {
+    "applicationName": "lodash-fantasy",
+    "cleverLinks": false,
+    "collapseSymbols": false,
+    "default": {
+      "outputSourceFiles": true
+    },
+    "linenums": true,
+    "meta": {
+      "description": "Fantasy Land compatible types built with lodash.",
+      "title": "Lodash Fantasy"
+    },
+    "monospaceLinks": true,
+    "openGraph": {
+      "type": "website"
+    }
+  }
+}

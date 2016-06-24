@@ -1,21 +1,58 @@
 {
   "name": "lodash-fantasy",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Fantasy Land compatible types built with lodash.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "author": "Justin Morgan <justin.l.morgan@gmail.com>",
   "keywords": [
+    "applicative",
+    "apply",
     "category",
+    "chain",
     "fantasy",
     "functional",
+    "functor",
     "land",
-    "lodash"
+    "lodash",
+    "monad",
+    "monoid",
+    "semigroup",
+    "setoid",
+    "validation"
   ],
-  "author": "Justin Morgan <justin.l.morgan@gmail.com>",
   "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jlmorgan/node-lodash-fantasy.git"
+  },
   "dependencies": {
-    "lodash": "^4.12.0"
+    "include": "^1.1.0",
+    "lodash": "^4.13.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "eslint": "^2.11.0",
+    "istanbul": "^0.4.3",
+    "jaguarjs-jsdoc": "^1.0.0",
+    "jscs": "^3.0.3",
+    "jsdoc": "^3.4.0",
+    "mocha": "^2.5.3",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0"
+  },
+  "engine-strict": true,
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "scripts": {
+    "build": "npm run checkstyle && npm run lint && npm run coverage && npm run docs",
+    "checkstyle": "node_modules/.bin/jscs data test",
+    "clean": "rm -rf build docs",
+    "coverage": "npm run mkdir && node_modules/.bin/istanbul cover --dir build/coverage node_modules/.bin/_mocha -- test/**/*Spec.js && node_modules/.bin/istanbul report html --dir build/coverage",
+    "docs": "node_modules/.bin/jsdoc -c lib/jsdoc.json -r",
+    "lint": "node_modules/.bin/eslint data test",
+    "mkdir": "mkdir -p build",
+    "test": "node_modules/.bin/mocha test/ValidationSpec.js"
   }
 }
