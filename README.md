@@ -10,7 +10,7 @@ _Note: Requires Node.js 4+._
 
 | Name | [Applicative][] | [Apply][] | [Chain][] | [Comonad][] | [Extend][] | [Foldable][] | [Functor][] | [Monad][] | [Monoid][] | [Semigroup][] | [Setoid][] | [Traversable][] |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| [Validation][] | &#10004; | &#10004; | &#10004; | &nbsp; | &nbsp; | &nbsp; | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | &nbsp; |
+| [Validation][] | &#10004; | &#10004; | &#10004; | &nbsp; | &#10004; | &nbsp; | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | &nbsp; |
 
 [Applicative]: https://github.com/fantasyland/fantasy-land#applicative
 [Apply]: https://github.com/fantasyland/fantasy-land#apply
