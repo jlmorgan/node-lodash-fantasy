@@ -910,7 +910,7 @@ Validation.toPromise = invoke("toPromise");
  * toBluebird(Failure.from(error));
  * // => Promise.reject([error]);
  */
-Validation.toPromiseWith = invokeIn("toPromise");
+Validation.toPromiseWith = invokeIn("toPromiseWith");
 
 /**
  * @extends Validation
