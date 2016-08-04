@@ -1,48 +1,33 @@
 "use strict";
 
 // Third Party
-const concat = require("lodash/fp/concat");
-const curry = require("lodash/fp/curry");
-const curryN = require("lodash/fp/curryN");
-const each = require("lodash/fp/each");
-const filter = require("lodash/fp/filter");
-const find = require("lodash/fp/find");
-const flow = require("lodash/fp/flow");
-const get = require("lodash/fp/get");
-const invoke = require("lodash/fp/invoke");
-const isEqual = require("lodash/fp/isEqual");
-const isUndefined = require("lodash/fp/isUndefined");
-const map = require("lodash/fp/map");
-const negate = require("lodash/fp/negate");
-const reduce = require("lodash/fp/reduce");
+const include = require("include")(__dirname);
 const stream = require("lodash/fp");
 
-/**
- * Invokes <code>method</code> with <code>value</code> in <code>source</code> object.
- * @private
- * @param {String} methodName - Method name to invoke.
- * @param {T} value - Value with which to invoke the method.
- * @param {Object} source - The object on which the method is invoked.
- * @return {U} Arbitrary value.
- */
-const invokeIn = curryN(3, (methodName, value, source) => source[methodName](value));
+// Third Party Aliases
+const concat = stream.concat;
+const curry = stream.curry;
+const each = stream.each;
+const filter = stream.filter;
+const find = stream.find;
+const flow = stream.flow;
+const get = stream.get;
+const invoke = stream.invoke;
+const isEqual = stream.isEqual;
+const isUndefined = stream.isUndefined;
+const map = stream.map;
+const negate = stream.negate;
+const reduce = stream.reduce;
 
-/**
- * Invokes <code>method</code> in <code>source</code> object with <code>value</code>.
- * @private
- * @param {String} methodName - Method name to invoke.
- * @param {Object} source - The object on which the method is invoked.
- * @param {T} value - Value with which to invoke the method.
- * @return {U} Arbitrary value.
- */
-const invokeWith = curryN(3, (methodName, source, value) => source[methodName](value));
+// Project
+const invokeIn = include("src/invokeIn");
+const invokeWith = include("src/invokeWith");
 
 /**
  * The {@link Validation} type is intended for validating values and aggregating failures. It is a disjunction
  * similar to <code>Either</code>. The key difference of the {@link Validation} type is the focus on failure
  * aggregation as opposed to failing once and ignoring all other failures. Much like <code>Either</code>,
  * {@link Validation} is right-biased.
- *
  * @param {*} value - Value to wrap.
  * @return {Validation} {@link Validation} wrapped <code>value</code>.
  * @example <caption>Via <code>new</code></caption>
@@ -296,7 +281,7 @@ class Validation {
    * Validation.of(Success.from(value));
    * // => Success(Success(value))
    *
-   * Validation.from(Failure.from("Error message"));
+   * Validation.of(Failure.from("Error message"));
    * // => Success(Failure(["Error message"]))
    */
   static of(value) {
@@ -405,18 +390,6 @@ class Validation {
    */
 
   /**
-   * Applies the provided function to the instance of {@link Success}. The function should return the value wrapped
-   * in a {@link Validation}. If the instance is a {@link Failure}, the function is ignored and then instance is
-   * returned unchanged.
-   * @abstract
-   * @function extend
-   * @memberof Validation
-   * @instance
-   * @param {Extend.<Validation>} method - The function to invoke with the instance.
-   * @return {Validation} {@link Validation} wrapped value returned by the provided <code>method</code>.
-   */
-
-  /**
    * Concatenates another {@link Validation} instance with the current instance.
    * @abstract
    * @function concat
@@ -500,7 +473,7 @@ class Validation {
   }
 
   /**
-   * Extends the validation.
+   * Extends the validation. This is used for workflow continuation where the context has shifted.
    * @abstract
    * @function extend
    * @memberof Validation
@@ -614,7 +587,7 @@ class Validation {
    * @function orElse
    * @memberof Validation
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
+   * @param {Consumer} method - The function to invoke with the value.
    * @return {Validation} Current instance.
    * @example <caption>Success#orElse</caption>
    *
@@ -634,7 +607,7 @@ class Validation {
    * @function orElseThrow
    * @memberof Validation
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
+   * @param {Function} method - The function to invoke with the value.
    * @throws {Error} returned by the provided function.
    * @example <caption>Success#orElseThrow</caption>
    *
@@ -643,8 +616,7 @@ class Validation {
    *
    * @example <caption>Failure#orElseThrow</caption>
    *
-   * Failure.from(error).orElseThrow(createException); // createException([error])
-   * // => Failure([error])
+   * Failure.from(error).orElseThrow(createException); // throw createException([error])
    */
 
   /**
@@ -730,7 +702,7 @@ class Validation {
 Validation.concat = invokeWith("concat");
 
 /**
- * Iterates over a collection of validations and invokes the <code>iteratee</code> for each validation. The
+ * Iterates over a collection of validations and invokes the <code>iteratee</code> for each {@link Validation}. The
  * <code>iteratee</code> is invoked with one argument: <code>(validation)</code>. Iteratee functions may exit iteration
  * early by explicitly returning a {@link Failure}.
  * @static
