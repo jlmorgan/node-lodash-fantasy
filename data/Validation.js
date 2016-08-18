@@ -505,13 +505,33 @@ class Validation {
    */
 
   /**
+   * Applies the provided function to the value contain for a {@link Failure}. Any return value from the function is
+   * ignored. If the instance is a {@link Success}, the function is ignored and the instance is returned.
+   * @abstract
+   * @function ifFailure
+   * @memberof Validation
+   * @instance
+   * @param {Consumer} method - The function to invoke with the value.
+   * @return {Validation} Current instance.
+   * @example <caption>Success#ifFailure</caption>
+   *
+   * Success.from(value).ifFailure(doSomething); // void
+   * // => Success(value)
+   *
+   * @example <caption>Failure#ifFailure</caption>
+   *
+   * Failure.from(error).ifFailure(doSomething); // doSomething([error])
+   * // => Failure([error])
+   */
+
+  /**
    * Applies the provided function to the value contain for a {@link Success}. Any return value from the function is
    * ignored. If the instance is a {@link Failure}, the function is ignored and the instance is returned.
    * @abstract
    * @function ifSuccess
    * @memberof Validation
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
+   * @param {Consumer} method - The function to invoke with the value.
    * @return {Validation} Current instance.
    * @example <caption>Success#ifSuccess</caption>
    *
@@ -596,13 +616,32 @@ class Validation {
    * @return {Validation} Current instance.
    * @example <caption>Success#orElse</caption>
    *
-   * Success.from(value).orElse(doSomething); // void
-   * // => Success(value)
+   * Success.from(value).orElse(otherValue);
+   * // => value
    *
    * @example <caption>Failure#orElse</caption>
    *
-   * Failure.from(error).orElse(doSomething); // doSomething([error])
-   * // => Failure([error])
+   * Failure.from(error).orElse(otherValue);
+   * // => otherValue
+   */
+
+  /**
+   * Return the value if the instance is a {@link Success} otherwise returns the value from the function provided.
+   * @abstract
+   * @function orElseGet
+   * @memberof Validation
+   * @instance
+   * @param {Supplier} method - The function supplying the optional value.
+   * @return {*}
+   * @example <caption>Success#orElseGet</caption>
+   *
+   * Success.from(value).orElseGet(getOtherValue);
+   * // => value
+   *
+   * @example <caption>Failure#orElseGet</caption>
+   *
+   * Failure.from().orElseGet(getOtherValue);
+   * // => otherValue
    */
 
   /**
@@ -996,6 +1035,12 @@ class Failure extends Validation {
     return this;
   }
 
+  ifFailure(method) {
+    method(this.value);
+
+    return this;
+  }
+
   ifSuccess() {
     return this;
   }
@@ -1004,10 +1049,12 @@ class Failure extends Validation {
     return this;
   }
 
-  orElse(method) {
-    method(this.value);
+  orElse(value) {
+    return value;
+  }
 
-    return this;
+  orElseGet(method) {
+    return method();
   }
 
   orElseThrow(method) {
@@ -1094,6 +1141,10 @@ class Success extends Validation {
     return Validation.from(method(this));
   }
 
+  ifFailure() {
+    return this;
+  }
+
   ifSuccess(method) {
     method(this.value);
 
@@ -1105,11 +1156,15 @@ class Success extends Validation {
   }
 
   orElse() {
-    return this;
+    return this.value;
+  }
+
+  orElseGet() {
+    return this.value;
   }
 
   orElseThrow() {
-    void 0;
+    return this.value;
   }
 
   toEither(either) {

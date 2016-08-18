@@ -435,7 +435,7 @@ class Maybe {
    * @function ifJust
    * @memberof Maybe
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
+   * @param {Consumer} method - The function to invoke with the value.
    * @return {Maybe} Current instance.
    * @example <caption>Just#ifJust</caption>
    *
@@ -445,6 +445,27 @@ class Maybe {
    * @example <caption>Nothing#ifJust</caption>
    *
    * Nothing.from().ifJust(doSomething); // void
+   * // => Nothing()
+   */
+
+  //
+  /**
+   * Applies the provided function to the value contain for a {@link Nothing}. Any return value from the function is
+   * ignored. If the instance is a {@link Just}, the function is ignored and the instance is returned.
+   * @abstract
+   * @function ifNothing
+   * @memberof Maybe
+   * @instance
+   * @param {Callable} method - The function to invoke.
+   * @return {Maybe} Current instance.
+   * @example <caption>Just#ifNothing</caption>
+   *
+   * Just.from(value).ifNothing(doSomething); // void
+   * // => Just(value)
+   *
+   * @example <caption>Nothing#ifNothing</caption>
+   *
+   * Nothing.from().ifNothing(doSomething); // doSomething()
    * // => Nothing()
    */
 
@@ -515,7 +536,7 @@ class Maybe {
    * @function orElse
    * @memberof Maybe
    * @instance
-   * @param {Consumer} method - The function to invoke with the value;
+   * @param {Consumer} method - The function to invoke with the value.
    * @return {*}
    * @example <caption>Just#orElse</caption>
    *
@@ -543,7 +564,7 @@ class Maybe {
    *
    * @example <caption>Nothing#orElseGet</caption>
    *
-   * Nothing.from().orElse(getOtherValue);
+   * Nothing.from().orElseGet(getOtherValue);
    * // => otherValue
    */
 
@@ -554,7 +575,7 @@ class Maybe {
    * @function orElseThrow
    * @memberof Maybe
    * @instance
-   * @param {Supplier} method -The function to invoke with the value.
+   * @param {Supplier} method - The function to invoke with the value.
    * @return {*}
    * @throws {Error} returned by the provided function.
    * @example <caption>Just#orElseThrow</caption>

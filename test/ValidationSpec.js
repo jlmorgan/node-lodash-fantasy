@@ -452,6 +452,17 @@ describe("Validation", () => {
       );
     });
 
+    describe("#ifFailure", () => {
+      const testFailure = new Failure(testMessage);
+      const testIfFailure = sinon.spy(() => true);
+      let actualResult = null;
+
+      before(() => actualResult = testFailure.ifFailure(testIfFailure));
+
+      it("should return the instance", () => expect(actualResult).to.equal(testFailure));
+      it("should call the provided ifFailure method", () => expect(testIfFailure).to.be.calledWith([testMessage]));
+    });
+
     describe("#ifSuccess", () => {
       const testFailure = new Failure(testMessage);
       const testIfSuccess = sinon.spy(() => true);
@@ -488,20 +499,33 @@ describe("Validation", () => {
 
     describe("#orElse", () => {
       const testFailure = new Failure(testMessage);
-      const testOrElse = sinon.spy(value => `${value} used`);
+      const testOrElseValue = testValue;
+      const expectedResult = testValue;
       let actualResult = null;
 
-      before(() => actualResult = testFailure.orElse(testOrElse));
+      before(() => actualResult = testFailure.orElse(testOrElseValue));
 
-      it("should return the instance", () => expect(actualResult).to.equal(testFailure));
-      it("should pass the values to the orElse method", () => expect(testOrElse).to.be.calledWith(testFailure.value));
+      it("should return the value passed", () => expect(actualResult).to.equal(expectedResult));
+    });
+
+    describe("#orElseGet", () => {
+      const testFailure = new Failure(testMessage);
+      const testValueSupplier = () => testValue;
+      const expectedResult = testValue;
+      let actualResult = null;
+
+      before(() => actualResult = testFailure.orElseGet(testValueSupplier));
+
+      it("should return the value supplied by the function passed", () =>
+        expect(actualResult).to.equal(expectedResult)
+      );
     });
 
     describe("#orElseThrow", () => {
       const testFailure = new Failure(testMessage);
+      const testExceptionSupplier = testMessage => new Error(testMessage);
 
       it("should throw the supplied error", () => {
-        const testExceptionSupplier = testMessage => new Error(testMessage);
         const testFn = () => testFailure.orElseThrow(testExceptionSupplier);
 
         expect(testFn).to.throw(testMessage);
@@ -704,6 +728,17 @@ describe("Validation", () => {
       );
     });
 
+    describe("#ifFailure", () => {
+      const testSuccess = new Success(testValue);
+      const testIfValue = sinon.spy(() => true);
+      let actualResult = null;
+
+      before(() => actualResult = testSuccess.ifFailure(testIfValue));
+
+      it("should return the instance", () => expect(actualResult).to.equal(testSuccess));
+      it("should not call the provided ifFailure method", () => expect(testIfValue).to.not.be.called);
+    });
+
     describe("#ifSuccess", () => {
       const testSuccess = new Success(testValue);
       const testIfSuccess = sinon.spy(() => true);
@@ -742,20 +777,31 @@ describe("Validation", () => {
 
     describe("#orElse", () => {
       const testSuccess = new Success(testValue);
-      const testOrElse = sinon.spy(value => `${value} used`);
+      const testOrElseValue = !testValue;
+      const expectedValue = testValue;
       let actualResult = null;
 
-      before(() => actualResult = testSuccess.orElse(testOrElse));
+      before(() => actualResult = testSuccess.orElse(testOrElseValue));
 
-      it("should return the instance", () => expect(actualResult).to.equal(testSuccess));
-      it("should not call the provided orElse method", () => expect(testOrElse).to.not.be.called);
+      it("should return the value of the instance", () => expect(actualResult).to.eql(expectedValue));
+    });
+
+    describe("#orElseGet", () => {
+      const testSuccess = new Success(testValue);
+      const testValueSupplier = () => !testValue;
+      const expectedResult = testValue;
+      let actualResult = null;
+
+      before(() => actualResult = testSuccess.orElseGet(testValueSupplier));
+
+      it("should return the value of the instance", () => expect(actualResult).to.equal(expectedResult));
     });
 
     describe("#orElseThrow", () => {
       const testSuccess = new Success(testValue);
+      const testExceptionSupplier = testValue => new Error(testValue);
 
       it("should not throw the supplied error", () => {
-        const testExceptionSupplier = testValue => new Error(testValue);
         const testFn = () => testSuccess.orElseThrow(testExceptionSupplier);
 
         expect(testFn).to.not.throw();
