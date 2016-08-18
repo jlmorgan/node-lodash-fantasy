@@ -15,35 +15,26 @@ chai.use(sinonChai);
 const expect = chai.expect;
 
 // Project
-const Apply = require("./laws/Apply")(expect);
 const Applicative = require("./laws/Applicative")(expect);
+const Apply = require("./laws/Apply")(expect);
 const Chain = require("./laws/Chain")(expect);
+const Either = include("data/Either");
 const Extend = require("./laws/Extend")(expect);
-const Monad = require("./laws/Monad")(expect);
 const Functor = require("./laws/Functor")(expect);
-const Setoid = require("./laws/Setoid")(expect);
 const Maybe = include("data/Maybe");
+const Monad = require("./laws/Monad")(expect);
+const Setoid = require("./laws/Setoid")(expect);
+const Validation = include("data/Validation");
 
 // Project Aliases
 const Nothing = Maybe.Nothing;
 const Just = Maybe.Just;
 
 describe("Maybe", () => {
+  const testValue = true;
+
   describe(".all", () => {
-    describe("nothings", () => {
-      const testValue = true;
-      const testMaybes = [Nothing.from(), Nothing.from(), Just.from(testValue)];
-      const expectedResult = null;
-      let actualResult = null;
-
-      before(() => actualResult = Maybe.all(testMaybes));
-
-      it("should return an instance of Nothing", () => expect(actualResult).to.be.instanceof(Nothing));
-      it("should return a singular nothing of all values", () => expect(actualResult.value).to.eql(expectedResult));
-    });
-
     describe("justs", () => {
-      const testValue = true;
       const testMaybes = [Just.from(testValue), Just.from(testValue)];
       const expectedResult = [testValue, testValue];
       let actualResult = null;
@@ -51,7 +42,18 @@ describe("Maybe", () => {
       before(() => actualResult = Maybe.all(testMaybes));
 
       it("should return an instance of Just", () => expect(actualResult).to.be.instanceof(Just));
-      it("should return a singular validation of all values", () => expect(actualResult.value).to.eql(expectedResult));
+      it("should return a singular Just of all values", () => expect(actualResult.value).to.eql(expectedResult));
+    });
+
+    describe("nothings", () => {
+      const testMaybes = [Nothing.from(), Nothing.from(), Just.from(testValue)];
+      const expectedResult = null;
+      let actualResult = null;
+
+      before(() => actualResult = Maybe.all(testMaybes));
+
+      it("should return an instance of Nothing", () => expect(actualResult).to.be.instanceof(Nothing));
+      it("should return a singular Nothing of all values", () => expect(actualResult.value).to.eql(expectedResult));
     });
   });
 
@@ -68,10 +70,9 @@ describe("Maybe", () => {
     });
 
     describe("justs", () => {
-      const testValue1 = true;
-      const testValue2 = false;
-      const testMessage1 = "Test error 1";
-      const testMaybes = [Nothing.from(testMessage1), Just.from(testValue1), Just.from(testValue2)];
+      const testValue1 = testValue;
+      const testValue2 = !testValue;
+      const testMaybes = [Nothing.from(), Just.from(testValue1), Just.from(testValue2)];
       let actualResult = null;
 
       before(() => actualResult = Maybe.any(testMaybes));
@@ -82,10 +83,8 @@ describe("Maybe", () => {
   });
 
   describe(".each", () => {
-    const testMessage = "Test error";
-    const testValue = false;
     const testCollection = [
-      Nothing.from(testMessage),
+      Nothing.from(),
       Just.from(testValue)
     ];
 
@@ -117,39 +116,28 @@ describe("Maybe", () => {
   });
 
   describe(".equals", () => {
-    it("should return true for same values but same types", () => {
-      const testValue = true;
+    it("should return true for same values but same types", () =>
+      expect(Maybe.equals(Just.from(testValue), Just.from(testValue))).to.be.true
+    );
 
-      expect(Maybe.equals(Just.from(testValue), Just.from(testValue))).to.be.true;
-    });
-
-    it("should return false for same values but different types", () => {
-      const testValue = true;
-
-      expect(Maybe.equals(Nothing.from(testValue), Just.from(testValue))).to.be.false;
-    });
+    it("should return false for same values but different types", () =>
+      expect(Maybe.equals(Nothing.from(testValue), Just.from(testValue))).to.be.false
+    );
   });
 
   describe(".isNothing", () => {
-    const testMessage = "Test error";
-    const testValue = true;
-
-    it("should return true for a Nothing", () => expect(Maybe.isNothing(Nothing.from(testMessage))).to.be.true);
+    it("should return true for a Nothing", () => expect(Maybe.isNothing(Nothing.from())).to.be.true);
     it("should return false for a Just", () => expect(Maybe.isNothing(Just.from(testValue))).to.be.false);
     it("should return false for an arbitrary value", () => expect(Maybe.isNothing(testValue)).to.be.false);
   });
 
   describe(".isJust", () => {
-    const testMessage = "Test error";
-    const testValue = true;
-
-    it("should return false for a Nothing", () => expect(Maybe.isJust(Nothing.from(testMessage))).to.be.false);
+    it("should return false for a Nothing", () => expect(Maybe.isJust(Nothing.from())).to.be.false);
     it("should return true for a Just", () => expect(Maybe.isJust(Just.from(testValue))).to.be.true);
     it("should return false for an arbitrary value", () => expect(Maybe.isJust(testValue)).to.be.false);
   });
 
   describe(".mapIn", () => {
-    const testValue = false;
     const testCollection = [
       Nothing.from(),
       Just.from(testValue)
@@ -190,32 +178,58 @@ describe("Maybe", () => {
     );
   });
 
-  describe(".toPromise", () => {
-    const testValue = false;
+  describe(".toEither", () => {
     const testNothing = Nothing.from();
     const testJust = Just.from(testValue);
+    const testEitherImplementation = Either;
+
+    it("should convert the Nothing to a Left", () =>
+      expect(Maybe.toEither(testEitherImplementation, testNothing)).to.be.instanceof(Either.Left)
+    );
+
+    it("should convert the Just to a Right", () =>
+      expect(Maybe.toEither(testEitherImplementation, testJust)).to.be.instanceof(Either.Right)
+    );
+
+    it("should contain the value of the Just", () => {
+      const expectedRight = Either.Right.from(testValue);
+
+      expect(Maybe.toEither(testEitherImplementation, testJust)).to.eql(expectedRight);
+    });
+  });
+
+  describe(".toPromise", () => {
+    const testNothing = Nothing.from();
+    const testJust = Just.from(testValue);
+    const testPromiseImplementation = Promise;
 
     it("should reject with the value of a Nothing", () =>
-      expect(Maybe.toPromise(testNothing)).to.eventually.be.rejectedWith(testValue)
+      expect(Maybe.toPromise(testPromiseImplementation, testNothing)).to.eventually.be.rejectedWith(testValue)
     );
 
     it("should resolve with the value of a Just", () =>
-      expect(Maybe.toPromise(testJust)).to.eventually.equal(testValue)
+      expect(Maybe.toPromise(testPromiseImplementation, testJust)).to.eventually.equal(testValue)
     );
   });
 
-  describe(".toPromiseWith", () => {
-    const testValue = false;
+  describe(".toValidation", () => {
     const testNothing = Nothing.from();
     const testJust = Just.from(testValue);
+    const testValidationImplementation = Validation;
 
-    it("should reject with the value of a Nothing", () =>
-      expect(Maybe.toPromiseWith(Promise, testNothing)).to.eventually.be.rejectedWith(testValue)
+    it("should convert the Nothing to a Failure", () =>
+      expect(Maybe.toValidation(testValidationImplementation, testNothing)).to.be.instanceof(Validation.Failure)
     );
 
-    it("should resolve with the value of a Just", () =>
-      expect(Maybe.toPromiseWith(Promise, testJust)).to.eventually.equal(testValue)
+    it("should convert the Success to a Success", () =>
+      expect(Maybe.toValidation(testValidationImplementation, testJust)).to.be.instanceof(Validation.Success)
     );
+
+    it("should contain the value of the Success", () => {
+      const expectedRight = Validation.Success.from(testValue);
+
+      expect(Maybe.toValidation(testValidationImplementation, testJust)).to.eql(expectedRight);
+    });
   });
 
   describe(".try", () => {
@@ -237,7 +251,6 @@ describe("Maybe", () => {
   describe("Nothing", () => {
     describe(".from", () => {
       describe("value", () => {
-        const testValue = true;
         const expectedResult = new Nothing(testValue);
 
         expect(Nothing.from()).to.eql(expectedResult);
@@ -250,7 +263,6 @@ describe("Maybe", () => {
       });
 
       describe("Just", () => {
-        const testValue = true;
         const testJust = new Just(testValue);
 
         expect(Nothing.from(testJust)).to.equal(testJust);
@@ -318,12 +330,12 @@ describe("Maybe", () => {
       it("should call the provided ifNothing method", () => expect(testIfNothing).to.be.called);
     });
 
-    describe("#isNothing", () => {
-      it("should return true", () => expect(new Nothing().isNothing()).to.be.true);
-    });
-
     describe("#isJust", () => {
       it("should return false", () => expect(new Nothing().isJust()).to.be.false);
+    });
+
+    describe("#isNothing", () => {
+      it("should return true", () => expect(new Nothing().isNothing()).to.be.true);
     });
 
     describe("#map", () => {
@@ -343,18 +355,17 @@ describe("Maybe", () => {
 
     describe("#orElse", () => {
       const testNothing = new Nothing();
-      const testOrElse = true;
       let actualResult = null;
 
-      before(() => actualResult = testNothing.orElse(testOrElse));
+      before(() => actualResult = testNothing.orElse(testValue));
 
-      it("should return the value passed to the orElse method", () => expect(actualResult).to.equal(testOrElse));
+      it("should return the value passed to the orElse method", () => expect(actualResult).to.equal(testValue));
     });
 
     describe("#orElseGet", () => {
       it("should return the value supplied by the function passed", () => {
         const testValueSupplier = () => true;
-        const expectedResult = true;
+        const expectedResult = testValue;
 
         expect(Nothing.from().orElseGet(testValueSupplier)).to.equal(expectedResult);
       });
@@ -364,7 +375,7 @@ describe("Maybe", () => {
       const testNothing = new Nothing();
 
       it("should throw the supplied error", () => {
-        const testMessage = "Test error message.";
+        const testMessage = "Test message.";
         const testExceptionSupplier = () => new Error(testMessage);
         const testFn = () => testNothing.orElseThrow(testExceptionSupplier);
 
@@ -372,31 +383,26 @@ describe("Maybe", () => {
       });
     });
 
-    describe("#toPromise", () => {
+    describe("#toEither", () => {
       const testNothing = new Nothing();
+      const testEitherImplementation = Either;
 
-      it("should return a Promise instance", () =>
-        expect(testNothing.toPromise()).to.be.instanceof(Promise)
+      it("should return a Either instance", () =>
+        expect(testNothing.toEither(testEitherImplementation)).to.be.instanceof(Either.Left)
       );
-
-      describe("Promise instance", () => {
-        it("should have rejected the value", () =>
-          expect(testNothing.toPromise()).to.be.rejectedWith(testNothing.value)
-        );
-      });
     });
 
-    describe("#toPromiseWith", () => {
+    describe("#toPromise", () => {
       const testNothing = new Nothing();
       const testPromiseImplementation = Promise;
 
       it("should return a Promise instance", () =>
-        expect(testNothing.toPromiseWith(testPromiseImplementation)).to.be.instanceof(Promise)
+        expect(testNothing.toPromise(testPromiseImplementation)).to.be.instanceof(Promise)
       );
 
       describe("Promise instance", () => {
         it("should have rejected the value", () =>
-          expect(testNothing.toPromiseWith(testPromiseImplementation)).to.be.rejectedWith(testNothing.value)
+          expect(testNothing.toPromise(testPromiseImplementation)).to.be.rejectedWith(testNothing.value)
         );
       });
     });
@@ -406,6 +412,15 @@ describe("Maybe", () => {
 
       it("should return a string containing the type and the values", () =>
         expect(testNothing.toString()).to.equal("Maybe.Nothing(null)")
+      );
+    });
+
+    describe("#toValidation", () => {
+      const testNothing = new Nothing();
+      const testValidationImplementation = Validation;
+
+      it("should return a Validation instance", () =>
+        expect(testNothing.toValidation(testValidationImplementation)).to.be.instanceof(Validation.Failure)
       );
     });
 
@@ -422,8 +437,6 @@ describe("Maybe", () => {
 
   describe("Just", () => {
     describe(".from", () => {
-      const testValue = true;
-
       describe("value", () => {
         const expectedResult = new Just(testValue);
 
@@ -450,7 +463,7 @@ describe("Maybe", () => {
     });
 
     describe("#ap", () => {
-      const testArgument = true;
+      const testArgument = testValue;
       const testJustFn = value => !value;
       const testJust = new Just(testJustFn);
       const testApplyValue = new Just(testArgument);
@@ -463,7 +476,6 @@ describe("Maybe", () => {
     });
 
     describe("#chain", () => {
-      const testValue = true;
       const testJust = new Just(testValue);
 
       describe("nothing result", () => {
@@ -507,7 +519,6 @@ describe("Maybe", () => {
     });
 
     describe("#equals", () => {
-      const testValue = true;
       const testJust1 = new Just(testValue);
       const testJust2 = new Just(testValue);
       const testJust3 = new Just(!testValue);
@@ -522,15 +533,10 @@ describe("Maybe", () => {
     });
 
     describe("#get", () => {
-      it("should return null", () => {
-        const testValue = true;
-
-        expect(Just.from(testValue).get()).to.equal(testValue);
-      });
+      it("should return null", () => expect(Just.from(testValue).get()).to.equal(testValue));
     });
 
     describe("#ifJust", () => {
-      const testValue = true;
       const testJust = new Just(testValue);
       const testIfJust = sinon.spy(() => true);
       let actualResult = null;
@@ -542,7 +548,6 @@ describe("Maybe", () => {
     });
 
     describe("#ifNothing", () => {
-      const testValue = true;
       const testJust = new Just(testValue);
       const testIfNothing = sinon.spy(() => true);
       let actualResult = null;
@@ -553,20 +558,15 @@ describe("Maybe", () => {
       it("should not call the provided ifNothing method", () => expect(testIfNothing).to.not.be.called);
     });
 
-    describe("#isNothing", () => {
-      const testValue = true;
-
-      it("should return false", () => expect(new Just(testValue).isNothing()).to.be.false);
-    });
-
     describe("#isJust", () => {
-      const testValue = true;
-
       it("should return true", () => expect(new Just(testValue).isJust()).to.be.true);
     });
 
+    describe("#isNothing", () => {
+      it("should return false", () => expect(new Just(testValue).isNothing()).to.be.false);
+    });
+
     describe("#map", () => {
-      const testValue = true;
       const testJust = new Just(testValue);
       const testMap = sinon.spy(value => !value);
       let actualResult = null;
@@ -584,9 +584,8 @@ describe("Maybe", () => {
     });
 
     describe("#orElse", () => {
-      const testValue = true;
       const testJust = new Just(testValue);
-      const testOrElseValue = false;
+      const testOrElseValue = !testValue;
       let actualResult = null;
 
       before(() => actualResult = testJust.orElse(testOrElseValue));
@@ -596,16 +595,14 @@ describe("Maybe", () => {
 
     describe("#orElseGet", () => {
       it("should return the value supplied by the function passed", () => {
-        const testValue = true;
         const testValueSupplier = () => false;
-        const expectedResult = true;
+        const expectedResult = testValue;
 
         expect(Just.from(testValue).orElseGet(testValueSupplier)).to.equal(expectedResult);
       });
     });
 
     describe("#orElseThrow", () => {
-      const testValue = true;
       const testJust = new Just(testValue);
       const testOrElseThrow = sinon.spy(testValue => new Error(testValue));
 
@@ -619,44 +616,62 @@ describe("Maybe", () => {
       it("should return the value", () => expect(testJust.orElseThrow()).to.eql(testValue));
     });
 
-    describe("#toPromise", () => {
-      const testValue = true;
+    describe("#toEither", () => {
       const testJust = new Just(testValue);
+      const testEitherImplementation = Either;
 
-      it("should return a Promise instance", () =>
-        expect(testJust.toPromise()).to.be.instanceof(Promise)
+      it("should convert the Just to a Right", () =>
+        expect(testJust.toEither(testEitherImplementation)).to.be.instanceof(Either.Right)
       );
 
-      describe("Promise instance", () => {
-        it("should have resolved the value", () =>
-          expect(testJust.toPromise()).to.eventually.equal(testJust.value)
-        );
+      describe("Either instance", () => {
+        it("should contain the value of the Just", () => {
+          const expectedRight = Either.Right.from(testValue);
+
+          expect(testJust.toEither(testEitherImplementation)).to.eql(expectedRight);
+        });
       });
     });
 
-    describe("#toPromiseWith", () => {
-      const testValue = true;
+    describe("#toPromise", () => {
       const testJust = new Just(testValue);
       const testPromiseImplementation = Promise;
 
       it("should return a Promise instance", () =>
-        expect(testJust.toPromiseWith(testPromiseImplementation)).to.be.instanceof(Promise)
+        expect(testJust.toPromise(testPromiseImplementation)).to.be.instanceof(Promise)
       );
 
       describe("Promise instance", () => {
         it("should have resolved the value", () =>
-          expect(testJust.toPromiseWith(testPromiseImplementation)).to.eventually.equal(testJust.value)
+          expect(testJust.toPromise(testPromiseImplementation)).to.eventually.equal(testJust.value)
         );
       });
     });
 
     describe("#toString", () => {
-      const testValue = [true, false];
-      const testJust = new Just(testValue);
+      const testValues = [true, false];
+      const testJust = new Just(testValues);
 
       it("should return a string containing the type and the values", () =>
         expect(testJust.toString()).to.equal("Maybe.Just(true,false)")
       );
+    });
+
+    describe("#toValidation", () => {
+      const testJust = new Just(testValue);
+      const testValidationImplementation = Validation;
+
+      it("should convert the Just to a Success", () =>
+        expect(testJust.toValidation(testValidationImplementation)).to.be.instanceof(Validation.Success)
+      );
+
+      describe("Validation instance", () => {
+        it("should contain the value of the Just", () => {
+          const expectedRight = Validation.Success.from(testValue);
+
+          expect(testJust.toValidation(testValidationImplementation)).to.eql(expectedRight);
+        });
+      });
     });
 
     describe("Algebraic Laws", () => {

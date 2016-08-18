@@ -12,7 +12,6 @@ const filter = stream.filter;
 const find = stream.find;
 const flow = stream.flow;
 const get = stream.get;
-const invoke = stream.invoke;
 const isEqual = stream.isEqual;
 const isNull = stream.isNull;
 const isUndefined = stream.isUndefined;
@@ -24,8 +23,8 @@ const reduce = stream.reduce;
 const invokeIn = include("src/invokeIn");
 
 /**
- * The {@link Maybe} type is intended for validating values and aggregating Nothings. It is a disjunction similar to
- * <code>Either</code>. The key difference of the {@link Maybe} type is the focus on a value or nothing. Much like
+ * The {@link Maybe} type is intended for values that may or may not be null or undefined. It is a disjunction similar
+ * to <code>Either</code>. The key difference of the {@link Maybe} type is the focus on a value or nothing. Much like
  * <code>Either</code>, {@link Maybe} is right-biased.
  * @param {*} value - Value to wrap.
  * @return {Maybe} {@link Maybe} wrapped <code>value</code>.
@@ -97,9 +96,7 @@ class Maybe {
    * // => Nothing()
    */
   static all(maybes) {
-    return find(Maybe.isNothing, maybes) ?
-      new Nothing() :
-      Maybe.ofNullable(stream(maybes).map(get("value")).reduce(concat, []));
+    return find(Maybe.isNothing, maybes) || Maybe.of(stream(maybes).map(get("value")).reduce(concat, []));
   }
 
   /**
@@ -131,8 +128,8 @@ class Maybe {
    * Maybe.any([m3, m4]);
    * // => Nothing()
    */
-  static any(Maybes) {
-    return find(Maybe.isJust, Maybes) || new Nothing();
+  static any(maybes) {
+    return find(Maybe.isJust, maybes) || new Nothing();
   }
 
   /**
@@ -289,8 +286,8 @@ class Maybe {
 
   /**
    * Tries to invoke a <code>supplier</code>. The result of the <code>supplier</code> is returned in a
-   * {@link Just}. If an exception is thrown, the error is returned in a {@link Nothing}. The <code>function</code>
-   * takes no arguments.
+   * {@link Just}. If an exception is thrown, a {@link Nothing} is returned. The <code>function</code> takes no
+   * arguments.
    * @static
    * @member
    * @param {Supplier} supplier - Function to invoke.
@@ -317,9 +314,9 @@ class Maybe {
 
   /**
    * Applies the function contained in the instance of a {@link Just} to the value contained in the provided
-   * {@link Just}, producing a {@link Just} containing the result. If the instance is {@link Nothing}, the result
-   * is a {@link Nothing} instance. If the instance is {@link Just} and the provided Maybe is {@link Nothing}, the
-   * result is the provided {@link Nothing}.
+   * {@link Just}, producing a {@link Just} containing the result. If the instance is a {@link Nothing}, the result
+   * is the {@link Nothing} instance. If the instance is a {@link Just} and the provided {@link Maybe} is
+   * {@link Nothing}, the result is the provided {@link Nothing}.
    * @abstract
    * @function ap
    * @memberof Maybe
@@ -390,17 +387,21 @@ class Maybe {
    * @return {Maybe}
    * @example <caption>Workflow continuation</caption>
    *
-   * const request = require("request");
+   * // Workflow from makeRequest.js
+   * const makeRequest = requestOptions => requestAsPromise(requestOptions)
+   *   .then(Just.from)
+   *   .catch(Nothing.from);
    *
    * // Workflow from savePerson.js
    * const savePerson = curry((requestOptions, optionalPerson) => optionalPerson
    *   .map(Person.from)
    *   .map(person => set("body", person, requestOptions))
-   *   .map(request)
+   *   .map(makeRequest)
    * );
    *
    * // Workflow from processResponse.js
-   * const processResponse = optionalResponse => optionalResponse.ifJust(console.log);
+   * const processResponse = optionalResponse => optionalResponse
+   *   .ifJust(console.log);
    *
    * Maybe.ofNullable(person)
    *   .extend(savePerson({ method: "POST" }))
@@ -493,6 +494,7 @@ class Maybe {
    * @return {Maybe} {@link Maybe} wrapped value mapped with the provided <code>method</code>.
    * @example
    *
+   * // Using lodash/fp/flow and sort
    * Just.from([1, 3, 2]).map(flow(sort, join(", ")));
    * // => Just("1, 2, 3")
    *
@@ -566,44 +568,49 @@ class Maybe {
    */
 
   /**
-   * Converts the Maybe to a <code>Promise</code>. {@link Just} becomes <code>resolve</code> and
-   * {@link Nothing} becomes <code>reject</code>.
+   * Converts the {@link Maybe} to an {@link Either}. {@link Just} becomes a {@link Right} and {@link Nothing} becomes a
+   * {@link Left}.
    * @abstract
-   * @function toPromise
+   * @function toEither
    * @memberof Maybe
    * @instance
-   * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
-   * @example <caption>Just#toPromise</caption>
+   * @param {Either} either - Either implementation.
+   * @return {Either} {@link Either} wrapped <code>value</code>.
+   * @example <caption>Just#toEither</caption>
    *
-   * Just.from(value).toPromise();
-   * // => Promise.resolve(value);
+   * const Either = require("lodash-fantasy/data/Either");
    *
-   * @example <caption>Nothing#toPromise</caption>
+   * Just.from(value).toEither(Either);
+   * // => Either.Right(value);
    *
-   * Nothing.from().toPromise();
-   * // => Promise.reject(null);
+   * @example <caption>Nothing#toEither</caption>
+   *
+   * const Either = require("lodash-fantasy/data/Either");
+   *
+   * Nothing.from().toEither(Either);
+   * // => Either.Left(null);
    */
 
   /**
    * Converts the Maybe to a <code>Promise</code> using the provided <code>Promise</code> implementation.
    * @abstract
-   * @function toPromiseWith
+   * @function toPromise
    * @memberof Maybe
    * @instance
    * @param {Promise} promise - Promise implementation.
    * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
-   * @example <caption>Just#toPromiseWith</caption>
+   * @example <caption>Just#toPromise</caption>
    *
    * const Bluebird = require("bluebird");
    *
-   * Just.from(value).toPromiseWith(Bluebird);
+   * Just.from(value).toPromise(Bluebird);
    * // => Promise.resolve(value);
    *
-   * @example <caption>Nothing#toPromiseWith</caption>
+   * @example <caption>Nothing#toPromise</caption>
    *
    * const Bluebird = require("bluebird");
    *
-   * Nothing.from().toPromiseWith(Bluebird);
+   * Nothing.from().toPromise(Bluebird);
    * // => Promise.reject(null);
    */
 
@@ -623,6 +630,30 @@ class Maybe {
    *
    * Nothing.from().toString();
    * // => "Maybe.Nothing(null)"
+   */
+
+  /**
+   * Converts the {@link Maybe} to an {@link Validation}. {@link Just} becomes a {@link Success} and {@link Nothing}
+   * becomes a {@link Failure}.
+   * @abstract
+   * @function toValidation
+   * @memberof Maybe
+   * @instance
+   * @param {Validation} validation - Validation implementation.
+   * @return {Validation} {@link Validation} wrapped <code>value</code>.
+   * @example <caption>Just#toValidation</caption>
+   *
+   * const Validation = require("lodash-fantasy/data/Validation");
+   *
+   * Just.from(value).toValidation(Validation);
+   * // => Validation.Success(value);
+   *
+   * @example <caption>Nothing#toValidation</caption>
+   *
+   * const Validation = require("lodash-fantasy/data/Validation");
+   *
+   * Nothing.from().toValidation(Validation);
+   * // => Validation.Failure([null]);
    */
 }
 
@@ -678,8 +709,8 @@ Maybe.each = curry((iteratee, values) => each(
 Maybe.equals = isEqual;
 
 /**
- * Iterates over a collection of values, returning an array of all values the <code>predicate</code> for which
- * returns truthy. The <code>predicate</code> is invoked with one argument: <code>(value)</code>.
+ * Iterates over a collection of values, returning an array of all values the <code>predicate</code> for which returns
+ * truthy. The <code>predicate</code> is invoked with one argument: <code>(value)</code>.
  * @static
  * @member
  * @param {Predicate} predicate - The function to invoke per iteration.
@@ -700,8 +731,8 @@ Maybe.equals = isEqual;
 Maybe.filter = filter;
 
 /**
- * Creates an array of values by invoking {@link Maybe#map} with the <code>iteratee</code> for each
- * {@link Maybe} in the collection. The iteratee is invoked with one argument: <code>(value)</code>.
+ * Creates an array of values by invoking {@link Maybe#map} with the <code>iteratee</code> for each {@link Maybe} in the
+ * collection. The iteratee is invoked with one argument: <code>(value)</code>.
  * @static
  * @member
  * @param {Function} iteratee - The function to invoke per iteration.
@@ -762,29 +793,35 @@ Maybe.map = map;
  *   getValue(path4, config) // => Nothing()
  * ];
  *
- * Maybe.reduce(Maybe.concat, Just.empty(), optionalValues);
- * // => Just([value1, value2])
+ * // Using lodash/fp/concat
+ * Maybe.reduce(
+ *   (result, value) => value.isJust() ? concat(result, value.get()) : result,
+ *   [],
+ *   optionalValues
+ * );
+ * // => [value1, value2]
  */
 Maybe.reduce = reduce;
 
 /**
- * Converts a {@link Maybe} to a <code>Promise</code>. {@link Just} becomes <code>resolve</code> and {@link Nothing}
- * becomes <code>reject</code>.
+ * Converts a {@link Maybe} to a {@link Either}. {@link Just} becomes a {@link Right} and {@link Nothing} becomes a
+ * {@link Left}.
  * @static
  * @member
+ * @param {Either} either - Either implementation.
  * @param {Maybe} value - Maybe to convert.
- * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
- * @example <caption>Just to Resolved</caption>
+ * @return {Either} {@link Either} wrapped <code>value</code>.
+ * @example <caption>Just to Right</caption>
  *
- * Maybe.toPromise(Just.from(value));
- * // => Promise.resolve(value);
+ * Maybe.toEither(Either, Just.from(value));
+ * // => Either.Right(value);
  *
- * @example <caption>Nothing to Rejected</caption>
+ * @example <caption>Nothing to Left</caption>
  *
- * Maybe.toPromise(Nothing.from());
- * // => Promise.reject(null);
+ * Maybe.toEither(Either, Nothing.from());
+ * // => Either.Left(null);
  */
-Maybe.toPromise = invoke("toPromise");
+Maybe.toEither = invokeIn("toEither");
 
 /**
  * Converts a validation to a <code>Promise</code> using the provided <code>Promise</code> implementation.
@@ -795,7 +832,7 @@ Maybe.toPromise = invoke("toPromise");
  * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
  * @example <caption>Convert with bluebird's implementation of Promise</caption>
  *
- * const toBluebird = Maybe.toPromiseWith(require("bluebird"));
+ * const toBluebird = Maybe.toPromise(require("bluebird"));
  *
  * toBluebird(Just.from(value));
  * // => Promise.resolve(value);
@@ -803,7 +840,27 @@ Maybe.toPromise = invoke("toPromise");
  * toBluebird(Nothing.from());
  * // => Promise.reject(null);
  */
-Maybe.toPromiseWith = invokeIn("toPromiseWith");
+Maybe.toPromise = invokeIn("toPromise");
+
+/**
+ * Converts a {@link Maybe} to a {@link Validation}. {@link Just} becomes a {@link Success} and {@link Nothing} becomes
+ * a {@link Failure}.
+ * @static
+ * @member
+ * @param {Validation} validation - Validation implementation.
+ * @param {Maybe} value - Maybe to convert.
+ * @return {Validation} {@link Validation} wrapped <code>value</code>.
+ * @example <caption>Just to Success</caption>
+ *
+ * Maybe.toValidation(Validation, Just.from(value));
+ * // => Validation.Success(value);
+ *
+ * @example <caption>Nothing to Failure</caption>
+ *
+ * Maybe.toValidation(Validation, Nothing.from());
+ * // => Validation.Failure(null);
+ */
+Maybe.toValidation = invokeIn("toValidation");
 
 /**
  * @extends Maybe
@@ -886,16 +943,20 @@ class Just extends Maybe {
     return this.value;
   }
 
-  toPromise() {
-    return Promise.resolve(this.value);
+  toEither(either) {
+    return new either.Right(this.value);
   }
 
-  toPromiseWith(promise) {
+  toPromise(promise) {
     return promise.resolve(this.value);
   }
 
   toString() {
     return `Maybe.Just(${this.value})`;
+  }
+
+  toValidation(validation) {
+    return new validation.Success(this.value);
   }
 }
 
@@ -912,7 +973,7 @@ class Nothing extends Maybe {
    * @param {*} value - Value to wrap in a {@link Nothing}.
    * @return {Maybe} {@link Maybe} when is the <code>value</code> already wrapped or {@link Nothing} wrapped
    * <code>value</code>.
-   * @example <caption>Nothing from empty array</caption>
+   * @example <caption>Nothing from nothing</caption>
    *
    * Nothing.from();
    * // => Nothing()
@@ -980,16 +1041,20 @@ class Nothing extends Maybe {
     throw method();
   }
 
-  toPromise() {
-    return Promise.reject(this.value);
+  toEither(either) {
+    return new either.Left(this.value);
   }
 
-  toPromiseWith(promise) {
+  toPromise(promise) {
     return promise.reject(this.value);
   }
 
   toString() {
     return "Maybe.Nothing(null)";
+  }
+
+  toValidation(validation) {
+    return new validation.Failure(this.value);
   }
 }
 
