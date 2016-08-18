@@ -352,31 +352,34 @@ describe("Either", () => {
 
     describe("#orElse", () => {
       const testLeft = new Left(testMessage);
+      const expectedResult = testValue;
       let actualResult = null;
 
       before(() => actualResult = testLeft.orElse(testValue));
 
-      it("should return the value passed to the orElse method", () => expect(actualResult).to.equal(testValue));
+      it("should return the value passed", () => expect(actualResult).to.equal(expectedResult));
     });
 
     describe("#orElseGet", () => {
-      it("should return the value supplied by the function passed", () => {
-        const testValueSupplier = () => testValue;
-        const expectedResult = testValue;
+      const testLeft = new Left(testMessage);
+      const testValueSupplier = () => testValue;
+      const expectedResult = testValue;
+      let actualResult = null;
 
-        expect(Left.from(testMessage).orElseGet(testValueSupplier)).to.equal(expectedResult);
-      });
+      before(() => actualResult = testLeft.orElseGet(testValueSupplier));
+
+      it("should return the value supplied by the function passed", () =>
+        expect(actualResult).to.equal(expectedResult)
+      );
     });
 
     describe("#orElseThrow", () => {
       const testLeft = new Left(testMessage);
+      const testExceptionSupplier = () => new Error(testMessage);
+      const testFn = () => testLeft.orElseThrow(testExceptionSupplier);
+      const expectedResult = testMessage;
 
-      it("should throw the supplied error", () => {
-        const testExceptionSupplier = () => new Error(testMessage);
-        const testFn = () => testLeft.orElseThrow(testExceptionSupplier);
-
-        expect(testFn).to.throw(testMessage);
-      });
+      it("should throw the supplied error", () => expect(testFn).to.throw(expectedResult));
     });
 
     describe("#toMaybe", () => {
@@ -608,12 +611,14 @@ describe("Either", () => {
     });
 
     describe("#orElseGet", () => {
-      it("should return the value supplied by the function passed", () => {
-        const testValueSupplier = () => false;
-        const expectedResult = testValue;
+      const testRight = new Right(testValue);
+      const testValueSupplier = () => !testValue;
+      const expectedResult = testValue;
+      let actualResult = null;
 
-        expect(Right.from(testValue).orElseGet(testValueSupplier)).to.equal(expectedResult);
-      });
+      before(() => actualResult = testRight.orElseGet(testValueSupplier));
+
+      it("should return the value of the instance", () => expect(actualResult).to.equal(expectedResult));
     });
 
     describe("#orElseThrow", () => {

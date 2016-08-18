@@ -416,13 +416,33 @@ class Either {
    */
 
   /**
+   * Applies the provided function to the value contain for a {@link Left}. Any return value from the function is
+   * ignored. If the instance is a {@link Right}, the function is ignored and the instance is returned.
+   * @abstract
+   * @function ifLeft
+   * @memberof Either
+   * @instance
+   * @param {Consumer} method - The function to invoke with the value.
+   * @return {Either} Current instance.
+   * @example <caption>Right#ifLeft</caption>
+   *
+   * Right.from(value).ifLeft(doSomething); // void
+   * // => Right(value)
+   *
+   * @example <caption>Left#ifLeft</caption>
+   *
+   * Left.from(error).ifLeft(doSomething); // doSomething(error)
+   * // => Left(error)
+   */
+
+  /**
    * Applies the provided function to the value contain for a {@link Right}. Any return value from the function is
    * ignored. If the instance is a {@link Left}, the function is ignored and the instance is returned.
    * @abstract
    * @function ifRight
    * @memberof Either
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
+   * @param {Consumer} method - The function to invoke with the value.
    * @return {Either} Current instance.
    * @example <caption>Right#ifRight</caption>
    *
@@ -501,7 +521,7 @@ class Either {
    * @function orElse
    * @memberof Either
    * @instance
-   * @param {Consumer} method - The function to invoke with the value;
+   * @param {Consumer} method - The function to invoke with the value.
    * @return {*}
    * @example <caption>Right#orElse</caption>
    *
@@ -540,7 +560,7 @@ class Either {
    * @function orElseThrow
    * @memberof Either
    * @instance
-   * @param {Function} method -The function to invoke with the value.
+   * @param {Function} method - The function to invoke with the value.
    * @return {*}
    * @throws {Error} returned by the provided function.
    * @example <caption>Right#orElseThrow</caption>

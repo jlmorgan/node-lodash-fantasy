@@ -1,6 +1,12 @@
 "use strict";
 
 /**
+ * @typedef Callable
+ * @type Function
+ * @description A <code>function</code> with no arguments or return value.
+ */
+
+/**
  * @typedef Chain
  * @type Function
  * @description A unary <code>function</code> that takes a <code>value</code> and returns a <code>value</code>
