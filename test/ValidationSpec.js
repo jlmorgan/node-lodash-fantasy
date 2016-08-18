@@ -14,12 +14,14 @@ chai.use(sinonChai);
 const expect = chai.expect;
 
 // Project
-const Apply = require("./laws/Apply")(expect);
 const Applicative = require("./laws/Applicative")(expect);
+const Apply = require("./laws/Apply")(expect);
 const Chain = require("./laws/Chain")(expect);
+const Either = include("data/Either");
 const Extend = require("./laws/Extend")(expect);
-const Monad = require("./laws/Monad")(expect);
 const Functor = require("./laws/Functor")(expect);
+const Maybe = include("data/Maybe");
+const Monad = require("./laws/Monad")(expect);
 const Monoid = require("./laws/Monoid")(expect);
 const Semigroup = require("./laws/Semigroup")(expect);
 const Setoid = require("./laws/Setoid")(expect);
@@ -30,11 +32,13 @@ const Failure = Validation.Failure;
 const Success = Validation.Success;
 
 describe("Validation", () => {
+  const testMessage = "Test error";
+  const testValue = true;
+
   describe(".all", () => {
     describe("failure(s)", () => {
-      const testMessage1 = "Test error 1";
-      const testMessage2 = "Test error 2";
-      const testValue = true;
+      const testMessage1 = `${testMessage} 1`;
+      const testMessage2 = `${testMessage} 2`;
       const testValidations = [Failure.from(testMessage1), Failure.from(testMessage2), Success.from(testValue)];
       const expectedValue = [testMessage1, testMessage2];
       let actualResult = null;
@@ -46,7 +50,6 @@ describe("Validation", () => {
     });
 
     describe("successes", () => {
-      const testValue = true;
       const testValidations = [Success.from(testValue), Success.from(testValue)];
       const expectedValue = [testValue, testValue];
       let actualResult = null;
@@ -60,8 +63,8 @@ describe("Validation", () => {
 
   describe(".any", () => {
     describe("failures", () => {
-      const testMessage1 = "Test error 1";
-      const testMessage2 = "Test error 2";
+      const testMessage1 = `${testMessage} 1`;
+      const testMessage2 = `${testMessage} 2`;
       const testValidations = [Failure.from(testMessage1), Failure.from(testMessage2)];
       const expectedValue = [testMessage1, testMessage2];
       let actualResult = null;
@@ -73,10 +76,9 @@ describe("Validation", () => {
     });
 
     describe("success(es)", () => {
-      const testValue1 = true;
-      const testValue2 = false;
-      const testMessage1 = "Test error 1";
-      const testValidations = [Failure.from(testMessage1), Success.from(testValue1), Success.from(testValue2)];
+      const testValue1 = testValue;
+      const testValue2 = !testValue;
+      const testValidations = [Failure.from(testMessage), Success.from(testValue1), Success.from(testValue2)];
       let actualResult = null;
 
       before(() => actualResult = Validation.any(testValidations));
@@ -88,8 +90,6 @@ describe("Validation", () => {
 
   describe(".concat", () => {
     describe("Failure with Success", () => {
-      const testMessage = "Test error";
-      const testValue = true;
       const testSuccess = new Success(testValue);
       const testFailure = new Failure(testMessage);
       const expectedValue = [testMessage];
@@ -102,7 +102,6 @@ describe("Validation", () => {
     });
 
     describe("Empty Failure with Failure", () => {
-      const testMessage = "Test error";
       const testFailure1 = new Failure();
       const testFailure2 = new Failure(testMessage);
       let actualResult = null;
@@ -121,7 +120,6 @@ describe("Validation", () => {
     });
 
     describe("Failure with Failure", () => {
-      const testMessage = "Test error";
       const testFailure1 = new Failure(`${testMessage}1`);
       const testFailure2 = new Failure(`${testMessage}2`);
       let actualResult = null;
@@ -140,7 +138,6 @@ describe("Validation", () => {
     });
 
     describe("Empty Success with Success", () => {
-      const testValue = true;
       const testSuccess1 = new Success();
       const testSuccess2 = new Success(testValue);
       let actualResult = null;
@@ -151,7 +148,6 @@ describe("Validation", () => {
     });
 
     describe("Success with Success", () => {
-      const testValue = true;
       const testSuccess1 = new Success(testValue);
       const testSuccess2 = new Success(!testValue);
       let actualResult = null;
@@ -163,8 +159,6 @@ describe("Validation", () => {
     });
 
     describe("Success with Failure", () => {
-      const testMessage = "Test error";
-      const testValue = true;
       const testSuccess = new Success(testValue);
       const testFailure = new Failure(testMessage);
       const expectedValue = [testMessage];
@@ -178,8 +172,6 @@ describe("Validation", () => {
   });
 
   describe(".each", () => {
-    const testMessage = "Test error";
-    const testValue = false;
     const testCollection = [
       Failure.from(testMessage),
       Success.from(testValue)
@@ -213,40 +205,28 @@ describe("Validation", () => {
   });
 
   describe(".equals", () => {
-    it("should return true for same values but same types", () => {
-      const testValue = true;
+    it("should return true for same values but same types", () =>
+      expect(Validation.equals(Success.from(testValue), Success.from(testValue))).to.be.true
+    );
 
-      expect(Validation.equals(Success.from(testValue), Success.from(testValue))).to.be.true;
-    });
-
-    it("should return false for same values but different types", () => {
-      const testValue = true;
-
-      expect(Validation.equals(Failure.from(testValue), Success.from(testValue))).to.be.false;
-    });
+    it("should return false for same values but different types", () =>
+      expect(Validation.equals(Failure.from(testValue), Success.from(testValue))).to.be.false
+    );
   });
 
   describe(".isFailure", () => {
-    const testMessage = "Test error";
-    const testValue = true;
-
     it("should return true for a Failure", () => expect(Validation.isFailure(Failure.from(testMessage))).to.be.true);
     it("should return false for a Success", () => expect(Validation.isFailure(Success.from(testValue))).to.be.false);
     it("should return false for an arbitrary value", () => expect(Validation.isFailure(testValue)).to.be.false);
   });
 
   describe(".isSuccess", () => {
-    const testMessage = "Test error";
-    const testValue = true;
-
     it("should return false for a Failure", () => expect(Validation.isSuccess(Failure.from(testMessage))).to.be.false);
     it("should return true for a Success", () => expect(Validation.isSuccess(Success.from(testValue))).to.be.true);
     it("should return false for an arbitrary value", () => expect(Validation.isSuccess(testValue)).to.be.false);
   });
 
   describe(".mapIn", () => {
-    const testMessage = "Test error";
-    const testValue = false;
     const testCollection = [
       Failure.from(testMessage),
       Success.from(testValue)
@@ -263,60 +243,89 @@ describe("Validation", () => {
   });
 
   describe(".of", () => {
-    const testValue = true;
-
     it("should return an instance of Success", () => expect(Validation.of(testValue)).to.be.instanceof(Success));
   });
 
-  describe(".toPromise", () => {
-    const testMessage = "Test error";
-    const testValue = false;
+  describe(".toEither", () => {
     const testFailure = Failure.from(testMessage);
     const testSuccess = Success.from(testValue);
 
-    it("should reject with the value of a Failure", () =>
-      expect(Validation.toPromise(testFailure)).to.eventually.be.rejectedWith(testValue)
+    it("should convert the Failure to a Left", () =>
+      expect(Validation.toEither(Either, testFailure)).to.be.instanceof(Either.Left)
     );
 
-    it("should resolve with the value of a Success", () =>
-      expect(Validation.toPromise(testSuccess)).to.eventually.equal(testValue)
+    it("should contain the value of the Failure", () => {
+      const expectedLeft = Either.Left.from([testMessage]);
+
+      expect(Validation.toEither(Either, testFailure)).to.eql(expectedLeft);
+    });
+
+    it("should convert the Success to a Right", () =>
+      expect(Validation.toEither(Either, testSuccess)).to.be.instanceof(Either.Right)
     );
+
+    it("should contain the value of the Success", () => {
+      const expectedRight = Either.Right.from(testValue);
+
+      expect(Validation.toEither(Either, testSuccess)).to.eql(expectedRight);
+    });
   });
 
-  describe(".toPromiseWith", () => {
-    const testMessage = "Test error";
-    const testValue = false;
+  describe(".toMaybe", () => {
+    const testFailure = Failure.from(testMessage);
+    const testSuccess = Success.from(testValue);
+
+    it("should convert the Failure to a Nothing", () =>
+      expect(Validation.toMaybe(Maybe, testFailure)).to.be.instanceof(Maybe.Nothing)
+    );
+
+    it("should not contain the value of the Failure", () => {
+      const expectedNothing = Maybe.Nothing.from();
+
+      expect(Validation.toMaybe(Maybe, testFailure)).to.eql(expectedNothing);
+    });
+
+    it("should convert the Success to a Just", () =>
+      expect(Validation.toMaybe(Maybe, testSuccess)).to.be.instanceof(Maybe.Just)
+    );
+
+    it("should contain the value of the Success", () => {
+      const expectedJust = Maybe.Just.from(testValue);
+
+      expect(Validation.toMaybe(Maybe, testSuccess)).to.eql(expectedJust);
+    });
+  });
+
+  describe(".toPromise", () => {
     const testFailure = Failure.from(testMessage);
     const testSuccess = Success.from(testValue);
 
     it("should reject with the value of a Failure", () =>
-      expect(Validation.toPromiseWith(Promise, testFailure)).to.eventually.be.rejectedWith(testValue)
+      expect(Validation.toPromise(Promise, testFailure)).to.eventually.be.rejectedWith(testValue)
     );
 
     it("should resolve with the value of a Success", () =>
-      expect(Validation.toPromiseWith(Promise, testSuccess)).to.eventually.equal(testValue)
+      expect(Validation.toPromise(Promise, testSuccess)).to.eventually.equal(testValue)
     );
   });
 
   describe(".try", () => {
     it("should return a Failure for a caught exception", () => {
       const testFn = () => {
-        throw new Error("Test error");
+        throw new Error(testMessage);
       };
 
       expect(Validation.try(testFn)).to.be.instanceof(Failure);
     });
 
     it("should return a Success for a normal execution", () => {
-      const testFn = () => true;
+      const testFn = () => testValue;
 
       expect(Validation.try(testFn)).to.be.instanceof(Success);
     });
   });
 
   describe("Failure", () => {
-    const testMessage = "Test error";
-
     describe(".from", () => {
       describe("value", () => {
         const expectedResult = new Failure(testMessage);
@@ -331,7 +340,6 @@ describe("Validation", () => {
       });
 
       describe("Success", () => {
-        const testValue = true;
         const testSuccess = new Success(testValue);
 
         expect(Failure.from(testSuccess)).to.equal(testSuccess);
@@ -384,8 +392,6 @@ describe("Validation", () => {
 
     describe("#concat", () => {
       describe("Failure with Success", () => {
-        const testMessage = "Test error";
-        const testValue = true;
         const testSuccess = new Success(testValue);
         const testFailure = new Failure(testMessage);
         let actualResult = null;
@@ -396,7 +402,6 @@ describe("Validation", () => {
       });
 
       describe("Empty Failure with Failure", () => {
-        const testMessage = "Test error";
         const testFailure1 = new Failure();
         const testFailure2 = new Failure(testMessage);
         let actualResult = null;
@@ -503,31 +508,29 @@ describe("Validation", () => {
       });
     });
 
-    describe("#toPromise", () => {
+    describe("#toEither", () => {
       const testFailure = new Failure(testMessage);
 
-      it("should return a Promise instance", () =>
-        expect(testFailure.toPromise()).to.be.instanceof(Promise)
-      );
-
-      describe("Promise instance", () => {
-        it("should have rejected the value", () =>
-          expect(testFailure.toPromise()).to.be.rejectedWith(testFailure.value)
-        );
-      });
+      it("should return a Either instance", () => expect(testFailure.toEither(Either)).to.be.instanceof(Either.Left));
     });
 
-    describe("#toPromiseWith", () => {
+    describe("#toMaybe", () => {
+      const testFailure = new Failure(testMessage);
+
+      it("should return a Maybe instance", () => expect(testFailure.toMaybe(Maybe)).to.be.instanceof(Maybe.Nothing));
+    });
+
+    describe("#toPromise", () => {
       const testFailure = new Failure(testMessage);
       const testPromiseImplementation = Promise;
 
       it("should return a Promise instance", () =>
-        expect(testFailure.toPromiseWith(testPromiseImplementation)).to.be.instanceof(Promise)
+        expect(testFailure.toPromise(testPromiseImplementation)).to.be.instanceof(Promise)
       );
 
       describe("Promise instance", () => {
         it("should have rejected the value", () =>
-          expect(testFailure.toPromiseWith(testPromiseImplementation)).to.be.rejectedWith(testFailure.value)
+          expect(testFailure.toPromise(testPromiseImplementation)).to.be.rejectedWith(testFailure.value)
         );
       });
     });
@@ -555,8 +558,6 @@ describe("Validation", () => {
 
   describe("Success", () => {
     describe(".from", () => {
-      const testValue = true;
-
       describe("value", () => {
         const expectedResult = new Success(testValue);
 
@@ -578,13 +579,11 @@ describe("Validation", () => {
     });
 
     describe("constructor", () => {
-      const testValue = value => !value;
-
       it("should return a new instance of Success", () => expect(new Success(testValue)).to.be.instanceof(Success));
     });
 
     describe("#ap", () => {
-      const testArgument = true;
+      const testArgument = testValue;
       const testSuccessFn = value => !value;
       const testSuccess = new Success(testSuccessFn);
       const testApplyValue = new Success(testArgument);
@@ -597,7 +596,6 @@ describe("Validation", () => {
     });
 
     describe("#bimap", () => {
-      const testValue = true;
       const testSuccess = new Success(testValue);
       const testBimapLeft = sinon.spy(value => `${value} bimapped`);
       const testBimapRight = sinon.spy(value => !value);
@@ -616,7 +614,6 @@ describe("Validation", () => {
     });
 
     describe("#chain", () => {
-      const testValue = true;
       const testSuccess = new Success(testValue);
 
       describe("failure wrapped result", () => {
@@ -661,7 +658,6 @@ describe("Validation", () => {
 
     describe("#concat", () => {
       describe("Empty Success with Success", () => {
-        const testValue = true;
         const testSuccess1 = new Success();
         const testSuccess2 = new Success(testValue);
         let actualResult = null;
@@ -672,7 +668,6 @@ describe("Validation", () => {
       });
 
       describe("Success with Success", () => {
-        const testValue = true;
         const testSuccess1 = new Success(testValue);
         const testSuccess2 = new Success(!testValue);
         let actualResult = null;
@@ -683,8 +678,6 @@ describe("Validation", () => {
       });
 
       describe("Success with Failure", () => {
-        const testMessage = "Test error";
-        const testValue = true;
         const testSuccess = new Success(testValue);
         const testFailure = new Failure(testMessage);
         const expectedValue = [testMessage];
@@ -698,7 +691,6 @@ describe("Validation", () => {
     });
 
     describe("#equals", () => {
-      const testValue = true;
       const testSuccess1 = new Success(testValue);
       const testSuccess2 = new Success(testValue);
       const testSuccess3 = new Success(!testValue);
@@ -713,7 +705,6 @@ describe("Validation", () => {
     });
 
     describe("#ifSuccess", () => {
-      const testValue = true;
       const testSuccess = new Success(testValue);
       const testIfSuccess = sinon.spy(() => true);
       let actualResult = null;
@@ -725,19 +716,14 @@ describe("Validation", () => {
     });
 
     describe("#isFailure", () => {
-      const testValue = true;
-
       it("should return false", () => expect(new Success(testValue).isFailure()).to.be.false);
     });
 
     describe("#isSuccess", () => {
-      const testValue = true;
-
       it("should return true", () => expect(new Success(testValue).isSuccess()).to.be.true);
     });
 
     describe("#map", () => {
-      const testValue = true;
       const testSuccess = new Success(testValue);
       const testMap = sinon.spy(value => !value);
       let actualResult = null;
@@ -751,13 +737,10 @@ describe("Validation", () => {
     });
 
     describe("#of", () => {
-      const testValue = true;
-
       it("should return an instance of Success", () => expect(new Success().of(testValue)).to.be.instanceof(Success));
     });
 
     describe("#orElse", () => {
-      const testValue = true;
       const testSuccess = new Success(testValue);
       const testOrElse = sinon.spy(value => `${value} used`);
       let actualResult = null;
@@ -769,7 +752,6 @@ describe("Validation", () => {
     });
 
     describe("#orElseThrow", () => {
-      const testValue = true;
       const testSuccess = new Success(testValue);
 
       it("should not throw the supplied error", () => {
@@ -780,40 +762,36 @@ describe("Validation", () => {
       });
     });
 
-    describe("#toPromise", () => {
-      const testValue = true;
+    describe("#toEither", () => {
       const testSuccess = new Success(testValue);
 
-      it("should return a Promise instance", () =>
-        expect(testSuccess.toPromise()).to.be.instanceof(Promise)
-      );
-
-      describe("Promise instance", () => {
-        it("should have resolved the value", () =>
-          expect(testSuccess.toPromise()).to.eventually.equal(testSuccess.value)
-        );
-      });
+      it("should return a Either instance", () => expect(testSuccess.toEither(Either)).to.be.instanceof(Either.Right));
     });
 
-    describe("#toPromiseWith", () => {
-      const testValue = true;
+    describe("#toMaybe", () => {
+      const testSuccess = new Success(testValue);
+
+      it("should return a Maybe instance", () => expect(testSuccess.toMaybe(Maybe)).to.be.instanceof(Maybe.Just));
+    });
+
+    describe("#toPromise", () => {
       const testSuccess = new Success(testValue);
       const testPromiseImplementation = Promise;
 
       it("should return a Promise instance", () =>
-        expect(testSuccess.toPromiseWith(testPromiseImplementation)).to.be.instanceof(Promise)
+        expect(testSuccess.toPromise(testPromiseImplementation)).to.be.instanceof(Promise)
       );
 
       describe("Promise instance", () => {
         it("should have resolved the value", () =>
-          expect(testSuccess.toPromiseWith(testPromiseImplementation)).to.eventually.equal(testSuccess.value)
+          expect(testSuccess.toPromise(testPromiseImplementation)).to.eventually.equal(testSuccess.value)
         );
       });
     });
 
     describe("#toString", () => {
-      const testValue = [true, false];
-      const testSuccess = new Success(testValue);
+      const testValues = [true, false];
+      const testSuccess = new Success(testValues);
 
       it("should return a string containing the type and the values", () =>
         expect(testSuccess.toString()).to.equal("Validation.Success(true,false)")
