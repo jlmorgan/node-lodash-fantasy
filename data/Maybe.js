@@ -133,6 +133,32 @@ class Maybe {
   }
 
   /**
+   * Creates a new {@link Maybe} from a <code>value</code>. If the <code>value</code> is already a {@link Maybe}
+   * instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Just} is made with the
+   * <code>value</code>.
+   * @static
+   * @member
+   * @param {*} value - Value to wrap in a {@link Maybe}.
+   * @return {Maybe} {@link Maybe} when is the <code>value</code> already wrapped or {@link Just} wrapped
+   * <code>value</code>.
+   *
+   * Maybe.from();
+   * // => Just()
+   *
+   * Maybe.from(true);
+   * // => Just(true)
+   *
+   * Maybe.from(Just.from(value));
+   * // => Just(value)
+   *
+   * Maybe.from(Nothing.from());
+   * // => Nothing()
+   */
+  static from(value) {
+    return this.isMaybe(value) ? value : this.ofNullable(value);
+  }
+
+  /**
    * Determines whether or not the value is a {@link Just}.
    * @static
    * @member
@@ -202,32 +228,6 @@ class Maybe {
    */
   static isNothing(value) {
     return value instanceof Nothing;
-  }
-
-  /**
-   * Creates a new {@link Maybe} from a <code>value</code>. If the <code>value</code> is already a {@link Maybe}
-   * instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Just} is made with the
-   * <code>value</code>.
-   * @static
-   * @member
-   * @param {*} value - Value to wrap in a {@link Maybe}.
-   * @return {Maybe} {@link Maybe} when is the <code>value</code> already wrapped or {@link Just} wrapped
-   * <code>value</code>.
-   *
-   * Maybe.from();
-   * // => Just()
-   *
-   * Maybe.from(true);
-   * // => Just(true)
-   *
-   * Maybe.from(Just.from(value));
-   * // => Just(value)
-   *
-   * Maybe.from(Nothing.from());
-   * // => Nothing()
-   */
-  static from(value) {
-    return this.isMaybe(value) ? value : this.ofNullable(value);
   }
 
   /**
@@ -448,7 +448,6 @@ class Maybe {
    * // => Nothing()
    */
 
-  //
   /**
    * Applies the provided function to the value contain for a {@link Nothing}. Any return value from the function is
    * ignored. If the instance is a {@link Just}, the function is ignored and the instance is returned.
@@ -531,7 +530,8 @@ class Maybe {
   }
 
   /**
-   * Returns the value if the instance is a {@link Just} otherwise the value provided.
+   * Returns the value if the instance is a {@link Just} otherwise returns the value supplied if the instance is a
+   * {@link Nothing}.
    * @abstract
    * @function orElse
    * @memberof Maybe
