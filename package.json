@@ -28,18 +28,18 @@
   },
   "dependencies": {
     "include": "^1.1.0",
-    "lodash": "^4.14.1"
+    "lodash": "^4.16.4"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "chai-as-promised": "^5.3.0",
-    "eslint": "^3.2.2",
-    "istanbul": "^0.4.4",
-    "jaguarjs-jsdoc": "^1.0.0",
+    "chai-as-promised": "^6.0.0",
+    "eslint": "^3.8.1",
+    "istanbul": "^0.4.5",
+    "jaguarjs-jsdoc": "^1.0.1",
     "jscs": "^3.0.7",
-    "jsdoc": "^3.4.0",
-    "mocha": "^3.0.1",
-    "sinon": "^1.17.5",
+    "jsdoc": "^3.4.2",
+    "mocha": "^3.1.2",
+    "sinon": "^1.17.6",
     "sinon-chai": "^2.8.0"
   },
   "engine-strict": true,
@@ -48,12 +48,12 @@
   },
   "scripts": {
     "build": "npm run checkstyle && npm run lint && npm run coverage && npm run docs",
-    "checkstyle": "node_modules/.bin/jscs data test",
+    "checkstyle": "jscs data test",
     "clean": "rm -rf build docs",
-    "coverage": "npm run mkdir && node_modules/.bin/istanbul cover --dir build/coverage node_modules/.bin/_mocha -- test/**/*Spec.js && node_modules/.bin/istanbul report html --dir build/coverage",
-    "docs": "node_modules/.bin/jsdoc -c lib/jsdoc.json -r",
-    "lint": "node_modules/.bin/eslint data test",
+    "coverage": "npm run mkdir && istanbul cover --dir build/coverage _mocha -- test/**/*Spec.js && istanbul report html --dir build/coverage",
+    "docs": "jsdoc -c lib/jsdoc.json -r",
+    "lint": "eslint data test",
     "mkdir": "mkdir -p build",
-    "test": "node_modules/.bin/mocha test/**/*Spec.js"
+    "test": "mocha test/**/*Spec.js"
   }
 }
