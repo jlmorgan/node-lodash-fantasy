@@ -140,24 +140,29 @@ class Either {
   }
 
   /**
-   * Determines whether or not the value is a {@link Right}.
+   * Creates a new {@link Either} from a <code>value</code>. If the <code>value</code> is already a {@link Either}
+   * instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Right} is made with the
+   * <code>value</code>.
    * @static
    * @member
-   * @param {*} value - Value to check.
-   * @return {Boolean} <code>true</code> for {@link Right}; <code>false</code> for {@link Left}.
-   * @example
+   * @param {*} value - Value to wrap in a {@link Either}.
+   * @return {Either} {@link Either} when is the <code>value</code> already wrapped or {@link Right} wrapped
+   * <code>value</code>.
    *
-   * isRight();
-   * // => false
+   * Either.from();
+   * // => Right()
    *
-   * isRight(Right.from());
-   * // => true
+   * Either.from(true);
+   * // => Right(true)
    *
-   * isRight(Left.from(error));
-   * // => false
+   * Either.from(Right.from(value));
+   * // => Right(value)
+   *
+   * Either.from(Left.from(error));
+   * // => Left(error)
    */
-  static isRight(value) {
-    return value instanceof Right;
+  static from(value) {
+    return this.isEither(value) ? value : this.of(value);
   }
 
   /**
@@ -203,29 +208,24 @@ class Either {
   }
 
   /**
-   * Creates a new {@link Either} from a <code>value</code>. If the <code>value</code> is already a {@link Either}
-   * instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Right} is made with the
-   * <code>value</code>.
+   * Determines whether or not the value is a {@link Right}.
    * @static
    * @member
-   * @param {*} value - Value to wrap in a {@link Either}.
-   * @return {Either} {@link Either} when is the <code>value</code> already wrapped or {@link Right} wrapped
-   * <code>value</code>.
+   * @param {*} value - Value to check.
+   * @return {Boolean} <code>true</code> for {@link Right}; <code>false</code> for {@link Left}.
+   * @example
    *
-   * Either.from();
-   * // => Right()
+   * isRight();
+   * // => false
    *
-   * Either.from(true);
-   * // => Right(true)
+   * isRight(Right.from());
+   * // => true
    *
-   * Either.from(Right.from(value));
-   * // => Right(value)
-   *
-   * Either.from(Left.from(error));
-   * // => Left(error)
+   * isRight(Left.from(error));
+   * // => false
    */
-  static from(value) {
-    return this.isEither(value) ? value : this.of(value);
+  static isRight(value) {
+    return value instanceof Right;
   }
 
   /**
@@ -516,7 +516,8 @@ class Either {
   }
 
   /**
-   * Returns the value if the instance is a {@link Right} otherwise the value provided.
+   * Returns the value if the instance is a {@link Right} otherwise returns the value supplied if the instance is a
+   * {@link Left}.
    * @abstract
    * @function orElse
    * @memberof Either

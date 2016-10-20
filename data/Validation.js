@@ -166,6 +166,32 @@ class Validation {
   }
 
   /**
+   * Creates a new {@link Validation} from a <code>value</code>. If the <code>value</code> is already a
+   * {@link Validation} instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Success} is
+   * created with the <code>value</code>.
+   * @static
+   * @member
+   * @param {*} value - Value to wrap in a {@link Validation}.
+   * @return {Validation} {@link Validation} when is the <code>value</code> already wrapped or
+   * {@link Success} wrapped <code>value</code>.
+   *
+   * Validation.from();
+   * // => Success()
+   *
+   * Validation.from(true);
+   * // => Success(true)
+   *
+   * Validation.from(Success.from(value));
+   * // => Success(value)
+   *
+   * Validation.from(Failure.from("Error message"));
+   * // => Failure(["Error message"])
+   */
+  static from(value) {
+    return this.isValidation(value) ? value : this.of(value);
+  }
+
+  /**
    * Determines whether or not the value is a {@link Failure}.
    * @static
    * @member
@@ -238,32 +264,6 @@ class Validation {
   }
 
   /**
-   * Creates a new {@link Validation} from a <code>value</code>. If the <code>value</code> is already a
-   * {@link Validation} instance, the <code>value</code> is returned unchanged. Otherwise, a new
-   * {@link Success} is made with the <code>value</code>.
-   * @static
-   * @member
-   * @param {*} value - Value to wrap in a {@link Validation}.
-   * @return {Validation} {@link Validation} when is the <code>value</code> already wrapped or
-   * {@link Success} wrapped <code>value</code>.
-   *
-   * Validation.from();
-   * // => Success()
-   *
-   * Validation.from(true);
-   * // => Success(true)
-   *
-   * Validation.from(Success.from(value));
-   * // => Success(value)
-   *
-   * Validation.from(Failure.from("Error message"));
-   * // => Failure(["Error message"])
-   */
-  static from(value) {
-    return this.isValidation(value) ? value : this.of(value);
-  }
-
-  /**
    * Wraps the <code>value</code> in a {@link Success}. No parts of <code>value</code> are checked.
    * @static
    * @member
@@ -288,9 +288,9 @@ class Validation {
   }
 
   /**
-   * Tries to invoke a <code>supplier</code>. The result of the <code>supplier</code> is returned in a
-   * {@link Success}. If an exception is thrown, the error is returned in a {@link Failure}. The <code>function</code>
-   * takes no arguments.
+   * Tries to invoke a <code>supplier</code>. The result of the <code>supplier</code> is returned in a {@link Success}.
+   * If an exception is thrown, the error is returned in a {@link Failure}. The <code>function</code> takes no
+   * arguments.
    * @static
    * @member
    * @param {Supplier} supplier - Function to invoke.
@@ -606,18 +606,18 @@ class Validation {
   }
 
   /**
-   * Applies the provided function to the value contain for a {@link Failure}. Any return value from the function is
-   * ignored. If the instance is a {@link Success}, the function is ignored and the instance is returned.
+   * Returns the value if the instance is a {@link Success} otherwise returns the value supplied if the instance is a
+   * {@link Failure}.
    * @abstract
    * @function orElse
    * @memberof Validation
    * @instance
-   * @param {Consumer} method - The function to invoke with the value.
-   * @return {Validation} Current instance.
+   * @param {*} value - Value to use if the instace is a {@link Failure}.
+   * @return {*}
    * @example <caption>Success#orElse</caption>
    *
    * Success.from(value).orElse(otherValue);
-   * // => value
+     * // => value
    *
    * @example <caption>Failure#orElse</caption>
    *
@@ -664,8 +664,8 @@ class Validation {
    */
 
   /**
-   * Converts the validation to an {@link Either}. {@link Success} becomes a {@link Right} and {@link Failure} becomes a
-   * {@link Left}.
+   * Converts the validation to an {@link Either} using the provided <code>Either</code> implementation. {@link Success}
+   * becomes a {@link Right} and {@link Failure} becomes a {@link Left}.
    * @abstract
    * @function toEither
    * @memberof Validation
@@ -684,8 +684,8 @@ class Validation {
    */
 
   /**
-   * Converts the validation to an {@link Maybe}. {@link Success} becomes a {@link Just} and {@link Failure} becomes a
-   * {@link Nothing}.
+   * Converts the validation to an {@link Maybe} using the provided <code>Maybe</code> implementation. {@link Success}
+   * becomes a {@link Just} and {@link Failure} becomes a {@link Nothing}.
    * @abstract
    * @function toMaybe
    * @memberof Validation
