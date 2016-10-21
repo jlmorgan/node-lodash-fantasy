@@ -75,9 +75,6 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 
-# Generated documentation
-docs
-
 # Generated reports
 reports
 
