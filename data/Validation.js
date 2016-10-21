@@ -1,48 +1,32 @@
 "use strict";
 
 // Third Party
-const concat = require("lodash/fp/concat");
-const curry = require("lodash/fp/curry");
-const curryN = require("lodash/fp/curryN");
-const each = require("lodash/fp/each");
-const filter = require("lodash/fp/filter");
-const find = require("lodash/fp/find");
-const flow = require("lodash/fp/flow");
-const get = require("lodash/fp/get");
-const invoke = require("lodash/fp/invoke");
-const isEqual = require("lodash/fp/isEqual");
-const isUndefined = require("lodash/fp/isUndefined");
-const map = require("lodash/fp/map");
-const negate = require("lodash/fp/negate");
-const reduce = require("lodash/fp/reduce");
+const include = require("include")(__dirname);
 const stream = require("lodash/fp");
 
-/**
- * Invokes <code>method</code> with <code>value</code> in <code>source</code> object.
- * @private
- * @param {String} methodName - Method name to invoke.
- * @param {T} value - Value with which to invoke the method.
- * @param {Object} source - The object on which the method is invoked.
- * @return {U} Arbitrary value.
- */
-const invokeIn = curryN(3, (methodName, value, source) => source[methodName](value));
+// Third Party Aliases
+const concat = stream.concat;
+const curry = stream.curry;
+const each = stream.each;
+const filter = stream.filter;
+const find = stream.find;
+const flow = stream.flow;
+const get = stream.get;
+const isEqual = stream.isEqual;
+const isUndefined = stream.isUndefined;
+const map = stream.map;
+const negate = stream.negate;
+const reduce = stream.reduce;
 
-/**
- * Invokes <code>method</code> in <code>source</code> object with <code>value</code>.
- * @private
- * @param {String} methodName - Method name to invoke.
- * @param {Object} source - The object on which the method is invoked.
- * @param {T} value - Value with which to invoke the method.
- * @return {U} Arbitrary value.
- */
-const invokeWith = curryN(3, (methodName, source, value) => source[methodName](value));
+// Project
+const invokeIn = include("src/invokeIn");
+const invokeWith = include("src/invokeWith");
 
 /**
  * The {@link Validation} type is intended for validating values and aggregating failures. It is a disjunction
  * similar to <code>Either</code>. The key difference of the {@link Validation} type is the focus on failure
  * aggregation as opposed to failing once and ignoring all other failures. Much like <code>Either</code>,
  * {@link Validation} is right-biased.
- *
  * @param {*} value - Value to wrap.
  * @return {Validation} {@link Validation} wrapped <code>value</code>.
  * @example <caption>Via <code>new</code></caption>
@@ -182,6 +166,32 @@ class Validation {
   }
 
   /**
+   * Creates a new {@link Validation} from a <code>value</code>. If the <code>value</code> is already a
+   * {@link Validation} instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Success} is
+   * created with the <code>value</code>.
+   * @static
+   * @member
+   * @param {*} value - Value to wrap in a {@link Validation}.
+   * @return {Validation} {@link Validation} when is the <code>value</code> already wrapped or
+   * {@link Success} wrapped <code>value</code>.
+   *
+   * Validation.from();
+   * // => Success()
+   *
+   * Validation.from(true);
+   * // => Success(true)
+   *
+   * Validation.from(Success.from(value));
+   * // => Success(value)
+   *
+   * Validation.from(Failure.from("Error message"));
+   * // => Failure(["Error message"])
+   */
+  static from(value) {
+    return this.isValidation(value) ? value : this.of(value);
+  }
+
+  /**
    * Determines whether or not the value is a {@link Failure}.
    * @static
    * @member
@@ -254,32 +264,6 @@ class Validation {
   }
 
   /**
-   * Creates a new {@link Validation} from a <code>value</code>. If the <code>value</code> is already a
-   * {@link Validation} instance, the <code>value</code> is returned unchanged. Otherwise, a new
-   * {@link Success} is made with the <code>value</code>.
-   * @static
-   * @member
-   * @param {*} value - Value to wrap in a {@link Validation}.
-   * @return {Validation} {@link Validation} when is the <code>value</code> already wrapped or
-   * {@link Success} wrapped <code>value</code>.
-   *
-   * Validation.from();
-   * // => Success()
-   *
-   * Validation.from(true);
-   * // => Success(true)
-   *
-   * Validation.from(Success.from(value));
-   * // => Success(value)
-   *
-   * Validation.from(Failure.from("Error message"));
-   * // => Failure(["Error message"])
-   */
-  static from(value) {
-    return this.isValidation(value) ? value : this.of(value);
-  }
-
-  /**
    * Wraps the <code>value</code> in a {@link Success}. No parts of <code>value</code> are checked.
    * @static
    * @member
@@ -296,7 +280,7 @@ class Validation {
    * Validation.of(Success.from(value));
    * // => Success(Success(value))
    *
-   * Validation.from(Failure.from("Error message"));
+   * Validation.of(Failure.from("Error message"));
    * // => Success(Failure(["Error message"]))
    */
   static of(value) {
@@ -304,9 +288,9 @@ class Validation {
   }
 
   /**
-   * Tries to invoke a <code>supplier</code>. The result of the <code>supplier</code> is returned in a
-   * {@link Success}. If an exception is thrown, the error is returned in a {@link Failure}. The <code>function</code>
-   * takes no arguments.
+   * Tries to invoke a <code>supplier</code>. The result of the <code>supplier</code> is returned in a {@link Success}.
+   * If an exception is thrown, the error is returned in a {@link Failure}. The <code>function</code> takes no
+   * arguments.
    * @static
    * @member
    * @param {Supplier} supplier - Function to invoke.
@@ -333,9 +317,9 @@ class Validation {
 
   /**
    * Applies the function contained in the instance of a {@link Success} to the value contained in the provided
-   * {@link Success}, producing a {@link Success} containing the result. If the instance is {@link Failure}, the result
-   * is a {@link Failure} instance. If the instance is {@link Success} and the provided validation is {@link Failure},
-   * the result is the provided {@link Failure}.
+   * {@link Success}, producing a {@link Success} containing the result. If the instance is a {@link Failure}, the
+   * result is the {@link Failure} instance. If the instance is a {@link Success} and the provided validation is
+   * {@link Failure}, the result is the provided {@link Failure}.
    * @abstract
    * @function ap
    * @memberof Validation
@@ -402,18 +386,6 @@ class Validation {
    *   .chain(createPerson) // => Validation<Response>
    *   .ifSuccess(doSomethingWithResponse)
    *   .orElse(each(console.error)); // Log all errors
-   */
-
-  /**
-   * Applies the provided function to the instance of {@link Success}. The function should return the value wrapped
-   * in a {@link Validation}. If the instance is a {@link Failure}, the function is ignored and then instance is
-   * returned unchanged.
-   * @abstract
-   * @function extend
-   * @memberof Validation
-   * @instance
-   * @param {Extend.<Validation>} method - The function to invoke with the instance.
-   * @return {Validation} {@link Validation} wrapped value returned by the provided <code>method</code>.
    */
 
   /**
@@ -500,7 +472,7 @@ class Validation {
   }
 
   /**
-   * Extends the validation.
+   * Extends the validation. This is used for workflow continuation where the context has shifted.
    * @abstract
    * @function extend
    * @memberof Validation
@@ -509,22 +481,47 @@ class Validation {
    * @return {Validation}
    * @example <caption>Workflow continuation</caption>
    *
-   * const request = require("request");
+   * // Workflow from makeRequest.js
+   * const makeRequest = requestOptions => requestAsPromise(requestOptions)
+   *   .then(Success.from)
+   *   .catch(Failure.from);
    *
    * // Workflow from savePerson.js
    * const savePerson = curry((requestOptions, validatedPerson) => {
    *   return validatedPerson
    *     .map(Person.from)
    *     .map(person => set("body", person, requestOptions))
-   *     .map(request);
+   *     .map(makeRequest);
    * });
    *
    * // Workflow from processResponse.js
-   * const processResponse = validatedResponse => validatedResponse.ifSuccess(console.log);
+   * const processResponse = validatedResponse => validatedResponse
+   *   .ifFailure(console.error)
+   *   .ifSuccess(console.log);
    *
    * validatePerson(person)
    *   .extend(savePerson({ method: "POST" }))
    *   .extend(processResponse);
+   */
+
+  /**
+   * Applies the provided function to the value contain for a {@link Failure}. Any return value from the function is
+   * ignored. If the instance is a {@link Success}, the function is ignored and the instance is returned.
+   * @abstract
+   * @function ifFailure
+   * @memberof Validation
+   * @instance
+   * @param {Consumer} method - The function to invoke with the value.
+   * @return {Validation} Current instance.
+   * @example <caption>Success#ifFailure</caption>
+   *
+   * Success.from(value).ifFailure(doSomething); // void
+   * // => Success(value)
+   *
+   * @example <caption>Failure#ifFailure</caption>
+   *
+   * Failure.from(error).ifFailure(doSomething); // doSomething([error])
+   * // => Failure([error])
    */
 
   /**
@@ -534,7 +531,7 @@ class Validation {
    * @function ifSuccess
    * @memberof Validation
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
+   * @param {Consumer} method - The function to invoke with the value.
    * @return {Validation} Current instance.
    * @example <caption>Success#ifSuccess</caption>
    *
@@ -593,6 +590,7 @@ class Validation {
    * @return {Validation} {@link Validation} wrapped value mapped with the provided <code>method</code>.
    * @example
    *
+   * // Using lodash/fp/flow and sort
    * Success.from([1, 3, 2]).map(flow(sort, join(", ")));
    * // => Success("1, 2, 3")
    *
@@ -608,23 +606,42 @@ class Validation {
   }
 
   /**
-   * Applies the provided function to the value contain for a {@link Failure}. Any return value from the function is
-   * ignored. If the instance is a {@link Success}, the function is ignored and the instance is returned.
+   * Returns the value if the instance is a {@link Success} otherwise returns the value supplied if the instance is a
+   * {@link Failure}.
    * @abstract
    * @function orElse
    * @memberof Validation
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
-   * @return {Validation} Current instance.
+   * @param {*} value - Value to use if the instace is a {@link Failure}.
+   * @return {*}
    * @example <caption>Success#orElse</caption>
    *
-   * Success.from(value).orElse(doSomething); // void
-   * // => Success(value)
+   * Success.from(value).orElse(otherValue);
+     * // => value
    *
    * @example <caption>Failure#orElse</caption>
    *
-   * Failure.from(error).orElse(doSomething); // doSomething([error])
-   * // => Failure([error])
+   * Failure.from(error).orElse(otherValue);
+   * // => otherValue
+   */
+
+  /**
+   * Return the value if the instance is a {@link Success} otherwise returns the value from the function provided.
+   * @abstract
+   * @function orElseGet
+   * @memberof Validation
+   * @instance
+   * @param {Supplier} method - The function supplying the optional value.
+   * @return {*}
+   * @example <caption>Success#orElseGet</caption>
+   *
+   * Success.from(value).orElseGet(getOtherValue);
+   * // => value
+   *
+   * @example <caption>Failure#orElseGet</caption>
+   *
+   * Failure.from().orElseGet(getOtherValue);
+   * // => otherValue
    */
 
   /**
@@ -634,7 +651,7 @@ class Validation {
    * @function orElseThrow
    * @memberof Validation
    * @instance
-   * @param {Consumer} method -The function to invoke with the value;
+   * @param {Function} method - The function to invoke with the value.
    * @throws {Error} returned by the provided function.
    * @example <caption>Success#orElseThrow</caption>
    *
@@ -643,49 +660,69 @@ class Validation {
    *
    * @example <caption>Failure#orElseThrow</caption>
    *
-   * Failure.from(error).orElseThrow(createException); // createException([error])
-   * // => Failure([error])
+   * Failure.from(error).orElseThrow(createException); // throw createException([error])
    */
 
   /**
-   * Converts the validation to a <code>Promise</code>. {@link Success} becomes <code>resolve</code> and
-   * {@link Failure} becomes <code>reject</code>.
+   * Converts the validation to an {@link Either} using the provided <code>Either</code> implementation. {@link Success}
+   * becomes a {@link Right} and {@link Failure} becomes a {@link Left}.
    * @abstract
-   * @function toPromise
+   * @function toEither
    * @memberof Validation
    * @instance
-   * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
-   * @example <caption>Success#toPromise</caption>
+   * @param {Either} either - Either implementation.
+   * @return {Either} {@link Either} wrapped <code>value</code>.
+   * @example <caption>Success#toEither</caption>
    *
-   * Success.from(value).toPromise();
-   * // => Promise.resolve(value);
+   * Success.from(value).toEither(Either);
+   * // => Either.Right(value);
    *
-   * @example <caption>Failure#toPromise</caption>
+   * @example <caption>Failure#toEither</caption>
    *
-   * Failure.from(error).toPromise();
-   * // => Promise.reject([error]);
+   * Failure.from(error).toEither(Either);
+   * // => Either.Left([error]);
+   */
+
+  /**
+   * Converts the validation to an {@link Maybe} using the provided <code>Maybe</code> implementation. {@link Success}
+   * becomes a {@link Just} and {@link Failure} becomes a {@link Nothing}.
+   * @abstract
+   * @function toMaybe
+   * @memberof Validation
+   * @instance
+   * @param {Maybe} maybe - Maybe implementation.
+   * @return {Maybe} {@link Maybe} wrapped <code>value</code>.
+   * @example <caption>Success#toMaybe</caption>
+   *
+   * Success.from(value).toMaybe(Maybe);
+   * // => Maybe.Just(value);
+   *
+   * @example <caption>Failure#toMaybe</caption>
+   *
+   * Failure.from(error).toMaybe(Maybe);
+   * // => Maybe.Nothing();
    */
 
   /**
    * Converts the validation to a <code>Promise</code> using the provided <code>Promise</code> implementation.
    * @abstract
-   * @function toPromiseWith
+   * @function toPromise
    * @memberof Validation
    * @instance
    * @param {Promise} promise - Promise implementation.
    * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
-   * @example <caption>Success#toPromiseWith</caption>
+   * @example <caption>Success#toPromise</caption>
    *
    * const Bluebird = require("bluebird");
    *
-   * Success.from(value).toPromiseWith(Bluebird);
+   * Success.from(value).toPromise(Bluebird);
    * // => Promise.resolve(value);
    *
-   * @example <caption>Failure#toPromiseWith</caption>
+   * @example <caption>Failure#toPromise</caption>
    *
    * const Bluebird = require("bluebird");
    *
-   * Failure.from(error).toPromiseWith(Bluebird);
+   * Failure.from(error).toPromise(Bluebird);
    * // => Promise.reject([error]);
    */
 
@@ -730,7 +767,7 @@ class Validation {
 Validation.concat = invokeWith("concat");
 
 /**
- * Iterates over a collection of validations and invokes the <code>iteratee</code> for each validation. The
+ * Iterates over a collection of validations and invokes the <code>iteratee</code> for each {@link Validation}. The
  * <code>iteratee</code> is invoked with one argument: <code>(validation)</code>. Iteratee functions may exit iteration
  * early by explicitly returning a {@link Failure}.
  * @static
@@ -875,23 +912,44 @@ Validation.map = map;
 Validation.reduce = reduce;
 
 /**
- * Converts a {@link Validation} to a <code>Promise</code>. {@link Success} becomes <code>resolve</code> and
- * {@link Failure} becomes <code>reject</code>.
+ * Converts a {@link Validation} to an {@link Either}. {@link Success} becomes a {@link Right} and {@link Failure}
+ * becomes {@link Left}.
  * @static
  * @member
+ * @param {Either} either - Either implementation.
  * @param {Validation} value - Validation to convert.
- * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
+ * @return {Either} {@link Either} wrapped <code>value</code>.
  * @example <caption>Success to Resolved</caption>
  *
- * Validation.toPromise(Success.from(value));
- * // => Promise.resolve(value);
+ * Validation.toEither(Either, Success.from(value));
+ * // => Either.Right(value);
  *
  * @example <caption>Failure to Rejected</caption>
  *
- * Validation.toPromise(Failure.from(error));
- * // => Promise.reject([error]);
+ * Validation.toEither(Either, Failure.from(error));
+ * // => Either.Left([error]);
  */
-Validation.toPromise = invoke("toPromise");
+Validation.toEither = invokeIn("toEither");
+
+/**
+ * Converts a {@link Validation} to an {@link Maybe}. {@link Success} becomes a {@link Just} and {@link Failure}
+ * becomes {@link Nothing}.
+ * @static
+ * @member
+ * @param {Maybe} maybe - Maybe implementation.
+ * @param {Validation} value - Validation to convert.
+ * @return {Maybe} {@link Maybe} wrapped <code>value</code>.
+ * @example <caption>Success to Resolved</caption>
+ *
+ * Validation.toMaybe(Maybe, Success.from(value));
+ * // => Maybe.Just(value);
+ *
+ * @example <caption>Failure to Rejected</caption>
+ *
+ * Validation.toMaybe(Maybe, Failure.from(error));
+ * // => Maybe.Nothing();
+ */
+Validation.toMaybe = invokeIn("toMaybe");
 
 /**
  * Converts a validation to a <code>Promise</code> using the provided <code>Promise</code> implementation.
@@ -902,7 +960,7 @@ Validation.toPromise = invoke("toPromise");
  * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
  * @example <caption>Convert with bluebird's implementation of Promise</caption>
  *
- * const toBluebird = Validation.toPromiseWith(require("bluebird"));
+ * const toBluebird = Validation.toPromise(require("bluebird"));
  *
  * toBluebird(Success.from(value));
  * // => Promise.resolve(value);
@@ -910,7 +968,7 @@ Validation.toPromise = invoke("toPromise");
  * toBluebird(Failure.from(error));
  * // => Promise.reject([error]);
  */
-Validation.toPromiseWith = invokeIn("toPromiseWith");
+Validation.toPromise = invokeIn("toPromise");
 
 /**
  * @extends Validation
@@ -925,7 +983,7 @@ class Failure extends Validation {
    * @param {*} value - Value to wrap in a {@link Failure}.
    * @return {Validation} {@link Validation} when is the <code>value</code> already wrapped or
    * {@link Failure} wrapped <code>value</code>.
-   * @example <caption>Failure from empty array</caption>
+   * @example <caption>Failure from nothing</caption>
    *
    * Failure.from();
    * // => Failure([])
@@ -977,6 +1035,12 @@ class Failure extends Validation {
     return this;
   }
 
+  ifFailure(method) {
+    method(this.value);
+
+    return this;
+  }
+
   ifSuccess() {
     return this;
   }
@@ -985,21 +1049,27 @@ class Failure extends Validation {
     return this;
   }
 
-  orElse(method) {
-    method(this.value);
+  orElse(value) {
+    return value;
+  }
 
-    return this;
+  orElseGet(method) {
+    return method();
   }
 
   orElseThrow(method) {
     throw method(this.value);
   }
 
-  toPromise() {
-    return Promise.reject(this.value);
+  toEither(either) {
+    return new either.Left(this.value);
   }
 
-  toPromiseWith(promise) {
+  toMaybe(maybe) {
+    return new maybe.Nothing();
+  }
+
+  toPromise(promise) {
     return promise.reject(this.value);
   }
 
@@ -1071,6 +1141,10 @@ class Success extends Validation {
     return Validation.from(method(this));
   }
 
+  ifFailure() {
+    return this;
+  }
+
   ifSuccess(method) {
     method(this.value);
 
@@ -1082,18 +1156,26 @@ class Success extends Validation {
   }
 
   orElse() {
-    return this;
+    return this.value;
+  }
+
+  orElseGet() {
+    return this.value;
   }
 
   orElseThrow() {
-    void 0;
+    return this.value;
   }
 
-  toPromise() {
-    return Promise.resolve(this.value);
+  toEither(either) {
+    return new either.Right(this.value);
   }
 
-  toPromiseWith(promise) {
+  toMaybe(maybe) {
+    return new maybe.Just(this.value);
+  }
+
+  toPromise(promise) {
     return promise.resolve(this.value);
   }
 

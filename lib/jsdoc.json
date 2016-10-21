@@ -1,6 +1,6 @@
 {
   "opts": {
-    "destination": "build/docs/",
+    "destination": "docs/",
     "encoding": "utf8",
     "recurse": true,
     "template": "node_modules/jaguarjs-jsdoc"
