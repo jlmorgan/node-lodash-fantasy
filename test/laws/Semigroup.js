@@ -7,9 +7,9 @@ module.exports = curry((expect, Type) =>
   describe("Semigroup", () => {
     it("should express associativity", () => {
       const testValue = true;
-      const testLeft = new Type(testValue);
-      const testMiddle = new Type(testValue);
-      const testRight = new Type(testValue);
+      const testLeft = Type(testValue);
+      const testMiddle = Type(testValue);
+      const testRight = Type(testValue);
 
       expect(testLeft.concat(testMiddle).concat(testRight))
         .to.eql(testLeft.concat(testMiddle.concat(testRight)));

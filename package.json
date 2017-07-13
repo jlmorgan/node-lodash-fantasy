@@ -27,7 +27,6 @@
     "url": "https://github.com/jlmorgan/node-lodash-fantasy.git"
   },
   "dependencies": {
-    "include": "^1.1.0",
     "lodash": "^4.16.4"
   },
   "devDependencies": {

@@ -1,1076 +1,415 @@
 "use strict";
 
 // Third Party
-const include = require("include")(__dirname);
-const stream = require("lodash/fp");
+const F = require("lodash/fp");
 
-// Third Party Aliases
-const concat = stream.concat;
-const curry = stream.curry;
-const each = stream.each;
-const filter = stream.filter;
-const find = stream.find;
-const flow = stream.flow;
-const get = stream.get;
-const isEqual = stream.isEqual;
-const map = stream.map;
-const negate = stream.negate;
-const reduce = stream.reduce;
-
-// Project
-const invokeIn = include("src/invokeIn");
+const Either = require("./class/Either").Either;
 
 /**
- * The {@link Either} type is intended for handling disjointed, but related values such as the result or exceptional
- * behavior of some function. It is a disjunction similar to <code>Validation</code>. The key difference of the
- * {@link Either} type is the focus on the single error as opposed to aggregating many errors. Much like
- * <code>Validation</code>, {@link Either} is right-biased.
- * @param {*} value - Value to wrap.
- * @return {Either} {@link Either} wrapped <code>value</code>.
- * @example <caption>Via <code>new</code></caption>
- *
- * const v1 = new Right(value);
- * const v2 = new Left(otherValue);
- *
- * @example <caption>Via function</caption>
- *
- * const v3 = Right.from(value);
- * const v4 = Left.from(otherValue);
- *
- * @example <caption>Via Either function</caption>
- *
- * const fs = require("fs");
- * const Either = require("lodash-fantasy/data/Either");
- *
- * function readFileSyncSafe(filePath, options) {
- *   let result = null;
- *
- *   try {
- *     result = Either.Right.from(fs.readFileSync(filePath, options));
- *   } catch (error) {
- *     result = Either.Left.from(error);
- *   }
- *
- *   return result;
- * }
- *
- * module.exports = getValue;
+ * {@link Either} type constructor.
+ * @constructor
+ * @param {*} right - Arbitrary right value.
+ * @return {Either}
  */
-class Either {
-  /**
-   * @static
-   * @property {Right} Right - Either right.
-   */
-  static get Right() {
-    return Right;
-  }
-
-  /**
-   * @static
-   * @property {Left} Left - Either left.
-   */
-  static get Left() {
-    return Left;
-  }
-
-  /**
-   * Returns a {@link Either} that resolves all of the eithers in the collection into a single Either.
-   * @static
-   * @member
-   * @param {Either[]} eithers - Collection of eithers.
-   * @return {Either} A {@link Either} representing all {@link Right} values or a singular {@link Left}.
-   * @example
-   *
-   * const e1 = fs.readFileSync(filePath1);
-   * // => Right(contents1)
-   *
-   * const e2 = fs.readFileSync(filePath2);
-   * // => Right(contents2)
-   *
-   * const e3 = fs.readFileSync(filePath3);
-   * // => Left(error3)
-   *
-   * const e4 = fs.readFileSync(filePath4);
-   * // => Left(error4)
-   *
-   * Either.all([e1, e2]);
-   * // => Right([contents1, contents2])
-   *
-   * Either.all([e1, e2, e3]);
-   * // => Left(error3)
-   *
-   * Either.all([e1, e2, e3, e4]);
-   * // => Left(error3)
-   */
-  static all(eithers) {
-    return find(Either.isLeft, eithers) || Either.of(stream(eithers).map(get("value")).reduce(concat, []));
-  }
-
-  /**
-   * Returns the first {@link Right} in the collection or finally a {@link Left}.
-   * @static
-   * @member
-   * @param {Either[]} eithers - Collection of eithers.
-   * @return {Either} First {@link Right} or finally a {@link Left}.
-   * @example
-   *
-   * const e1 = fs.readFileSync(filePath1);
-   * // => Right(contents1)
-   *
-   * const e2 = fs.readFileSync(filePath2);
-   * // => Right(contents2)
-   *
-   * const e3 = fs.readFileSync(filePath3);
-   * // => Left(error3)
-   *
-   * const e4 = fs.readFileSync(filePath4);
-   * // => Left(error4)
-   *
-   * Either.any([e1, e2]);
-   * // => Right(contents1)
-   *
-   * Either.any([e2, e3]);
-   * // => Right(contents2)
-   *
-   * Either.any([e3, e4]);
-   * // => Left(error3)
-   */
-  static any(either) {
-    return find(Either.isRight, either) || find(Either.isLeft, either);
-  }
-
-  /**
-   * Creates a new {@link Either} from a <code>value</code>. If the <code>value</code> is already a {@link Either}
-   * instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Right} is made with the
-   * <code>value</code>.
-   * @static
-   * @member
-   * @param {*} value - Value to wrap in a {@link Either}.
-   * @return {Either} {@link Either} when is the <code>value</code> already wrapped or {@link Right} wrapped
-   * <code>value</code>.
-   *
-   * Either.from();
-   * // => Right()
-   *
-   * Either.from(true);
-   * // => Right(true)
-   *
-   * Either.from(Right.from(value));
-   * // => Right(value)
-   *
-   * Either.from(Left.from(error));
-   * // => Left(error)
-   */
-  static from(value) {
-    return this.isEither(value) ? value : this.of(value);
-  }
-
-  /**
-   * Determines whether or not the value is a {@link Either}.
-   * @static
-   * @member
-   * @param {*} value - Value to check.
-   * @return {Boolean} <code>true</code> for {@link Either}; <code>false</code> for anything else.
-   * @example
-   *
-   * isEither();
-   * // => false
-   *
-   * isEither(Right.from());
-   * // => true
-   *
-   * isEither(Left.from(error));
-   * // => true
-   */
-  static isEither(value) {
-    return value instanceof Either;
-  }
-
-  /**
-   * Determines whether or not the value is a {@link Left}.
-   * @static
-   * @member
-   * @param {*} value - Value to check.
-   * @return {Boolean} <code>true</code> for {@link Left}; <code>false</code> for {@link Right}.
-   * @example
-   *
-   * isLeft();
-   * // => false
-   *
-   * isLeft(Left.from(error));
-   * // => true
-   *
-   * isLeft(Right.from());
-   * // => false
-   */
-  static isLeft(value) {
-    return value instanceof Left;
-  }
-
-  /**
-   * Determines whether or not the value is a {@link Right}.
-   * @static
-   * @member
-   * @param {*} value - Value to check.
-   * @return {Boolean} <code>true</code> for {@link Right}; <code>false</code> for {@link Left}.
-   * @example
-   *
-   * isRight();
-   * // => false
-   *
-   * isRight(Right.from());
-   * // => true
-   *
-   * isRight(Left.from(error));
-   * // => false
-   */
-  static isRight(value) {
-    return value instanceof Right;
-  }
-
-  /**
-   * Wraps the <code>value</code> in a {@link Right}. No parts of <code>value</code> are checked.
-   * @static
-   * @member
-   * @param {*} value - Value to wrap.
-   * @return {Right} {@link Right} wrapped <code>value</code>.
-   * @example
-   *
-   * Either.of();
-   * // => Right()
-   *
-   * Either.of(true);
-   * // => Right(true)
-   *
-   * Either.of(Right.from(value));
-   * // => Right(Right(value))
-   *
-   * Either.of(Left.from(error));
-   * // => Right(Left(error))
-   */
-  static of(value) {
-    return new Right(value);
-  }
-
-  /**
-   * Tries to invoke a <code>supplier</code>. The result of the <code>supplier</code> is returned in a {@link Right}.
-   * If an exception is thrown, the error is returned in a {@link Left}. The <code>function</code> takes no arguments.
-   * @static
-   * @member
-   * @param {Supplier} supplier - Function to invoke.
-   * @return {Either} {@link Right} wrapped supplier result or {@link Left} wrapped <code>error</code>.
-   * @example
-   *
-   * Either.try(normalFunction);
-   * // => Right(returnValue)
-   *
-   * Either.try(throwableFunction);
-   * // => Left(error)
-   */
-  static try(method) {
-    try {
-      return Right.from(method());
-    } catch (error) {
-      return Left.from(error);
-    }
-  }
-
-  constructor(value) {
-    this.value = value;
-  }
-
-  /**
-   * Applies the function contained in the instance of a {@link Right} to the value contained in the provided
-   * {@link Right}, producing a {@link Right} containing the result. If the instance is a {@link Left}, the result
-   * is the {@link Left} instance. If the instance is a {@link Right} and the provided {@link Either} is {@link Left},
-   * the result is the provided {@link Left}.
-   * @abstract
-   * @function ap
-   * @memberof Either
-   * @instance
-   * @param {Either} other - Value to apply to the function wrapped in the {@link Right}.
-   * @return {Either} {@link Right} wrapped applied function or {@link Left}.
-   * @example <caption>Right#ap</caption>
-   *
-   * const findPerson = curryN(3, Person.find); // Person.find(name, birthdate, address)
-   *
-   * Right.from(findPerson) // => Right(findPerson)
-   *   .ap(Right.try(getName())) // => Right(name)
-   *   .ap(Right.try(getBirthdate())) // => Right(birthdate)
-   *   .ap(Right.try(getAddress())) // => Right(address)
-   *   .ifRight(console.log); // => Log Person.find() response
-   */
-
-  /**
-   * Transforms a {@link Either} by applying the first function to the contained value for a {@link Left} or the
-   * second function for a {@link Right}. The result of each map is wrapped in the corresponding type.
-   * @abstract
-   * @function bimap
-   * @memberof Either
-   * @instance
-   * @param {Function} failureMap - Map to apply to the {@link Left}.
-   * @param {Function} successMap - Map to apply to the {@link Right}.
-   * @return {Either} {@link Either} wrapped value mapped with the corresponding mapping function.
-   * @example
-   *
-   * // Using lodash/fp/get
-   * Either.try(loadFile)
-   *   .bimap(get("message"), parseFile)
-   *   // ... other actions in workflow
-   */
-
-  /**
-   * Applies the provided function to the value contained for a {@link Right}. The function should return the value
-   * wrapped in a {@link Either}. If the instance is a {@link Left}, the function is ignored and then instance is
-   * returned unchanged.
-   * @abstract
-   * @function chain
-   * @memberof Either
-   * @instance
-   * @param {Chain.<Either>} method - The function to invoke with the value.
-   * @return {Either} {@link Either} wrapped value returned by the provided <code>method</code>.
-   * @example <caption>Right#chain</caption>
-   *
-   * // Using lodash/fp/curry and getOr
-   * const getConfigOption = curry((path, config) => Either.Right.from(getOr(
-   *   Either.Left.from(`Value not found at "${path}"`),
-   *   path,
-   *   config
-   * )));
-   *
-   * Either.of(config)
-   *   .chain(getConfigOption("path.to.option"))
-   */
-
-  /**
-   * Determines whether or not the <code>other</code> is equal in value to the current (<code>this</code>). This is
-   * <strong>not</strong> a reference check.
-   * @param {*} other - Other value to check.
-   * @return {Boolean} <code>true</code> if the two Eithers are equal; <code>false</code> if not equal.
-   * @example <caption>Reflexivity</caption>
-   *
-   * v1.equals(v1) === true;
-   * // => true
-   *
-   * @example <caption>Symmetry</caption>
-   *
-   * v1.equals(v2) === v2.equals(v1);
-   * // => true
-   *
-   * @example <caption>Transitivity</caption>
-   *
-   * (v1.equals(v2) === v2.equals(v3)) && v1.equals(v3)
-   * // => true
-   */
-  equals(other) {
-    return isEqual(this, other);
-  }
-
-  /**
-   * Extends the Either. This is used for workflow continuation where the context has shifted.
-   * @abstract
-   * @function extend
-   * @memberof Either
-   * @instance
-   * @param {Extend.<Either>} - method - The function to invoke with the value.
-   * @return {Either}
-   * @example <caption>Workflow continuation</caption>
-   *
-   * // Workflow from makeRequest.js
-   * const makeRequest = requestOptions => requestAsPromise(requestOptions)
-   *   .then(Right.from)
-   *   .catch(Left.from);
-   *
-   * // Workflow from savePerson.js
-   * const savePerson = curry((requestOptions, eitherPerson) => eitherPerson
-   *   .map(Person.from)
-   *   .map(person => set("body", person, requestOptions))
-   *   .map(makeRequest)
-   * );
-   *
-   * // Workflow from processResponse.js
-   * const processResponse = eitherResponse => eitherResponse
-   *   .ifLeft(console.error)
-   *   .ifRight(console.log);
-   *
-   * Either.of(person)
-   *   .extend(savePerson({ method: "POST" }))
-   *   .extend(processResponse);
-   */
-
-  /**
-   * Returns the value if the instance is a {@link Right} otherwise the <code>null</code>.
-   * @function get
-   * @memberof Either
-   * @instance
-   * @return {*}
-   * @example <caption>Right#get</caption>
-   *
-   * Right.from(value).get();
-   * // => value
-   *
-   * @example <caption>Left#get</caption>
-   *
-   * Left.from(error).get();
-   * // => null
-   */
-
-  /**
-   * Applies the provided function to the value contain for a {@link Left}. Any return value from the function is
-   * ignored. If the instance is a {@link Right}, the function is ignored and the instance is returned.
-   * @abstract
-   * @function ifLeft
-   * @memberof Either
-   * @instance
-   * @param {Consumer} method - The function to invoke with the value.
-   * @return {Either} Current instance.
-   * @example <caption>Right#ifLeft</caption>
-   *
-   * Right.from(value).ifLeft(doSomething); // void
-   * // => Right(value)
-   *
-   * @example <caption>Left#ifLeft</caption>
-   *
-   * Left.from(error).ifLeft(doSomething); // doSomething(error)
-   * // => Left(error)
-   */
-
-  /**
-   * Applies the provided function to the value contain for a {@link Right}. Any return value from the function is
-   * ignored. If the instance is a {@link Left}, the function is ignored and the instance is returned.
-   * @abstract
-   * @function ifRight
-   * @memberof Either
-   * @instance
-   * @param {Consumer} method - The function to invoke with the value.
-   * @return {Either} Current instance.
-   * @example <caption>Right#ifRight</caption>
-   *
-   * Right.from(value).ifRight(doSomething); // doSomething(value)
-   * // => Right(value)
-   *
-   * @example <caption>Left#ifRight</caption>
-   *
-   * Left.from(error).ifRight(doSomething); // void
-   * // => Left(error)
-   */
-
-  /**
-   * Determines whether or not the instance is a {@link Left}.
-   * @return {Boolean} <code>true</code> if the instance is a {@link Left}; <code>false</code> is not.
-   * @example <caption>Right#isLeft</caption>
-   *
-   * Right.from(value).isLeft();
-   * // => false
-   *
-   * @example <caption>Left#isLeft</caption>
-   *
-   * Left.from(error).isLeft();
-   * // => true
-   */
-  isLeft() {
-    return this instanceof Left;
-  }
-
-  /**
-   * Determines whether or not the instance is a {@link Right}.
-   * @return {Boolean} <code>true</code> if the instance is a {@link Right}; <code>false</code> is not.
-   * @example <caption>Right</caption>
-   *
-   * Right.from(value).isLeft();
-   * // => true
-   *
-   * @example <caption>Left#isRight</caption>
-   *
-   * Left.from(error).isLeft();
-   * // => false
-   */
-  isRight() {
-    return this instanceof Right;
-  }
-
-  /**
-   * Applies the provided function to the value contained for a {@link Right} which is, in turn, wrapped in a
-   * {@link Right}. If the instance is a {@link Left}, the function is ignored and then instance is returned unchanged.
-   * @abstract
-   * @function map
-   * @memberof Either
-   * @instance
-   * @param {Function} method - The function to invoke with the value.
-   * @return {Either} {@link Either} wrapped value mapped with the provided <code>method</code>.
-   * @example
-   *
-   * // Using lodash/fp/flow and sort
-   * Right.from([1, 3, 2]).map(flow(sort, join(", ")));
-   * // => Right("1, 2, 3")
-   *
-   * Left.from(error).map(flow(sort, join(", ")));
-   * // => Left(error)
-   */
-
-  /**
-   * @see Either.of
-   */
-  of(value) {
-    return Either.of(value);
-  }
-
-  /**
-   * Returns the value if the instance is a {@link Right} otherwise returns the value supplied if the instance is a
-   * {@link Left}.
-   * @abstract
-   * @function orElse
-   * @memberof Either
-   * @instance
-   * @param {Consumer} method - The function to invoke with the value.
-   * @return {*}
-   * @example <caption>Right#orElse</caption>
-   *
-   * Right.from(value).orElse(otherValue);
-   * // => value
-   *
-   * @example <caption>Left#orElse</caption>
-   *
-   * Left.from(error).orElse(otherValue);
-   * // => otherValue
-   */
-
-  /**
-   * Return the value if the instance is a {@link Right} otherwise returns the value from the function provided.
-   * @abstract
-   * @function orElseGet
-   * @memberof Either
-   * @instance
-   * @param {Supplier} method - The function supplying the optional value.
-   * @return {*}
-   * @example <caption>Right#orElseGet</caption>
-   *
-   * Right.from(value).orElseGet(getOtherValue);
-   * // => value
-   *
-   * @example <caption>Left#orElseGet</caption>
-   *
-   * Left.from(error).orElse(getOtherValue);
-   * // => otherValue
-   */
-
-  /**
-   * Returns the value if the instance is a {@link Right} otheriwse throws the <code>Error</code> supplied by the
-   * function provided. The function receives the value of the {@link Left} as its argument.
-   * @abstract
-   * @function orElseThrow
-   * @memberof Either
-   * @instance
-   * @param {Function} method - The function to invoke with the value.
-   * @return {*}
-   * @throws {Error} returned by the provided function.
-   * @example <caption>Right#orElseThrow</caption>
-   *
-   * Right.from(value).orElseThrow(createException);
-   * // => value
-   *
-   * @example <caption>Left#orElseThrow</caption>
-   *
-   * Left.from(error).orElseThrow(createException); // throw createException(error)
-   */
-
-  /**
-   * Converts the Either to a {@link Maybe}. {@link Right} becomes {@link Just} and {@link Left} becomes
-   * {@link Nothing}.
-   * @abstract
-   * @function toMaybe
-   * @memberof Either
-   * @instance
-   * @param {Maybe} maybe - Maybe implementation.
-   * @return {Maybe} {@link Maybe} wrapped <code>value</code>.
-   * @example <caption>Right#toMaybe</caption>
-   *
-   * Right.from(value).toMaybe(Maybe);
-   * // => Maybe.Just(value);
-   *
-   * @example <caption>Left#toMaybe</caption>
-   *
-   * Left.from(error).toMaybe(Maybe);
-   * // => Maybe.Nothing();
-   */
-
-  /**
-   * Converts the Either to a <code>Promise</code> using the provided <code>Promise</code> implementation.
-   * @abstract
-   * @function toPromise
-   * @memberof Either
-   * @instance
-   * @param {Promise} promise - Promise implementation.
-   * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
-   * @example <caption>Right#toPromise</caption>
-   *
-   * const Bluebird = require("bluebird");
-   *
-   * Right.from(value).toPromise(Bluebird);
-   * // => Promise.resolve(value);
-   *
-   * @example <caption>Left#toPromise</caption>
-   *
-   * const Bluebird = require("bluebird");
-   *
-   * Left.from(error).toPromise(Bluebird);
-   * // => Promise.reject(error);
-   */
-
-  /**
-   * Returns a <code>String</code> representation of the {@link Either}.
-   * @abstract
-   * @function toString
-   * @memberof Either
-   * @instance
-   * @return {String} <code>String</code> representation.
-   * @example <caption>Right#toString</caption>
-   *
-   * Right.from(1).toString();
-   * // => "Either.Right(1)"
-   *
-   * @example <caption>Left#toString</caption>
-   *
-   * Left.from(error).toString();
-   * // => "Either.Left(error)"
-   */
-
-  /**
-   * Converts the Either to a {@link Validation}. {@link Right} becomes {@link Success} and {@link Left} becomes
-   * {@link Failure}.
-   * @abstract
-   * @function toValidation
-   * @memberof Either
-   * @instance
-   * @param {Validation} validation - Validation implementation.
-   * @return {Validation} {@link Validation} wrapped <code>value</code>.
-   * @example <caption>Right#toValidation</caption>
-   *
-   * Right.from(value).toValidation(Validation);
-   * // => Validation.Success(value);
-   *
-   * @example <caption>Left#toValidation</caption>
-   *
-   * Left.from(error).toValidation(Validation);
-   * // => Validation.Failure();
-   */
+function EitherType(right) {
+  return Either.right(right);
 }
 
 /**
- * Iterates over a collection of eithers and invokes the <code>iteratee</code> for each {@link Either}. The
- * <code>iteratee</code> is invoked with one argument: <code>(value)</code>. Iteratee functions may exit iteration
- * early by explicitly returning a {@link Left}.
+ * Returns a {@link Either} that resolves all of the maybes in the collection into a single {@link Either}.
  * @static
- * @member
+ * @memberof Either
+ * @param {Either[]} list - Array of {@link Either}.
+ * @return {Either}
+ * @example
+ *
+ * const e1 = Either.right(value1);
+ * const e2 = Either.right(value2);
+ * const e3 = Either.left(error1);
+ * const e4 = Either.left(error2);
+ *
+ * Either.all([e1, e2]);
+ * // => Right([value1, value2])
+ *
+ * Either.all([e1, e2, e3]);
+ * // => Left(error1)
+ *
+ * Either.all([e1, e2, e3, e4]);
+ * // => Left(error1)
+ */
+EitherType.all = list => F.find(Either.isLeft, list) ||
+  Either.right(F(list).map(Either.fromRight).reduce(F.concat, []));
+
+/**
+ * Static implementation of {@link Either#alt}.
+ * @static
+ * @memberof Either
+ * @alias Either.coalesce
+ * @param {(Either|Supplier.<Either>)} other - Another instance of {@link Either} or a {@link Supplier} that produces a
+ * {@link Either}.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#alt
+ */
+EitherType.alt = F.curry((other, either) => either.alt(other));
+
+/**
+ * Returns the first {@link Right} as a {@link Just} in the collection or finally a {@link Nothing}.
+ * @static
+ * @memberof Either
+ * @param {Maybe} maybe - Maybe implementation.
+ * @param {Either[]} list - List of {@link Either}.
+ * @return {Either}
+ * @example
+ *
+ * const e1 = Either.right(value1);
+ * const e2 = Either.right(value2);
+ * const e3 = Either.left(error1);
+ * const e4 = Either.left(error2);
+ *
+ * Either.any([e1, e2]);
+ * // => Right(value1)
+ *
+ * Either.any([e2, e3]);
+ * // => Right(value2)
+ *
+ * Either.any([e3, e4]);
+ * // => Left(error1)
+ */
+EitherType.any = F.curry((maybe, list) => F.isNull(list) || F.isUndefined(list) ?
+  maybe.nothing() :
+  maybe(F(list)
+    .filter(Either.isRight)
+    .map(Either.fromRight)
+    .head()
+  )
+);
+
+/**
+ * Static implementation of {@link Either#ap}.
+ * @static
+ * @memberof Either
+ * @param {Either.<Function>} other - A {@link Either} of a {@link Function}.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#ap
+ */
+EitherType.ap = F.curry((other, either) => either.ap(other));
+
+/**
+ * Captures the possible {@link Error} as a {@link Left} otherwise the {@code value} in a {@link Right}.
+ * @memberof Either
+ * @static
+ * @param {Supplier} supplier - A supplier.
+ * @return {Either}
+ * @example <caption>Thrown error</caption>
+ *
+ * const data = Either.attempt(() => fs.readFileSync(filePath, options));
+ * // Right(fileData) or Left(Error)
+ *
+ * @example <caption>Possible null object path</caption>
+ *
+ * const value = Either.attempt(() => context.some.property.path.value);
+ * // Right(contextValue) or Left(Error)
+ */
+EitherType.attempt = function (supplier) {
+  try {
+    return EitherType.right(supplier());
+  } catch (error) {
+    return EitherType.left(error);
+  }
+};
+
+/**
+ * Static implementation of {@link Either#chain}.
+ * @static
+ * @memberof Either
+ * @param {Chain.<Either>} morphism - A chaining function.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#chain
+ */
+EitherType.chain = F.curry((morphism, either) => either.chain(morphism));
+
+/**
+ * Static implementation of {@link Either#checkedBimap}.
+ * @static
+ * @memberof Either
+ * @param {Function} leftFold - Folds the left value and the {@link Error} thrown by the {@code morphism} into a
+ * singular value.
+ * @param {Throwable} throwable - A throwable function.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#checkedMap
+ */
+EitherType.checkedBimap = F.curryN(3, (leftFold, throwable, either) => either.checkedBimap(leftFold, throwable));
+
+/**
+ * Iterates over a collection of eithers and invokes the {@code iteratee} for each {@link Either}. The {@code iteratee}
+ * is invoked with one argument: {@code (value)}. Iteratee functions may exit iteration early by explicitly returning a
+ * {@link Left}.
+ * @static
+ * @memberof Either
  * @param {Consumer} iteratee - The function to invoke per iteration.
- * @param {Either[]} values - Collection of Eithers over which to iterate.
+ * @param {Either[]} values - Collection of {@link Either} over which to iterate.
  * @return {Either[]} Current {@link Either} collection.
  * @example
  *
  * const optionalValues = [
  *   getValue(path1, source), // => Right(value1)
  *   getValue(path2, source), // => Right(value2)
- *   getValue(path3, source), // => Left()
- *   getValue(path4, source) // => Left()
+ *   getValue(path3, source), // => Left(error1)
+ *   getValue(path4, source), // => Left(error2)
+ *   getValue(path6, source)  // => Right(value3)
  * ];
  *
- * Either.each(eitherValue => eitherValue.ifRight(console.log), optionalValues);
- * // => Right(value1)
- * // => Right(value2)
+ * Either.each(Either.ifRight(console.log), optionalValues);
+ * // => value1
+ * // => value2
  */
-Either.each = curry((iteratee, values) => each(
-  flow(iteratee, negate(Either.isLeft)),
+EitherType.each = F.curry((iteratee, values) => F.each(
+  F.pipe(iteratee, Either.isNotLeft),
   values
 ));
 
 /**
- * Determines whether or not the <code>other</code> is equal in value to the current (<code>this</code>). This is
- * <strong>not</strong> a reference check.
+ * Reduces the {@link Left} and {@link Right} values into a singular value from the {@link Either}.
  * @static
- * @member
- * @param {*} other - Other value to check.
- * @return {Boolean} <code>true</code> if the two validations are equal; <code>false</code> if not equal.
- * @example <caption>Reflexivity</caption>
+ * @memberof Either
+ * @param {Function} leftMapper - Maps the {@link Left} value.
+ * @param {Function} rightMapper - Maps the {@link Right} value.
+ * @return {*}
+ * @example
+ * const eitherFile = Either.attempt(() => fs.readFileSync("file.txt", "utf8"));
  *
- * Either.equals(v1, v1) === true;
- * // => true
- *
- * @example <caption>Symmetry</caption>
- *
- * Either(v1, v2) === Either.equals(v2, v1);
- * // => true
- *
- * @example <caption>Transitivity</caption>
- *
- * (Either.equals(v1, v2) === Either.equals(v2, v3)) && Either.equals(v1, v3)
- * // => true
+ * Either.either(F.constant(""), F.identity, eitherFile);
+ * // => fileData or ""
  */
-Either.equals = isEqual;
+EitherType.either = F.curryN(3, (leftMapper, rightMapper, either) => either.isRight() ?
+  rightMapper(Either.fromRight(either)) :
+  leftMapper(Either.fromLeft(either))
+);
 
 /**
- * Iterates over a collection of values, returning an array of all values the <code>predicate</code> for which returns
- * truthy. The <code>predicate</code> is invoked with one argument: <code>(value)</code>.
+ * Static implementation of {@link Either#equals}.
  * @static
- * @member
- * @param {Predicate} predicate - The function to invoke per iteration.
- * @param {Eithers[]} values - Collection of values over which to iterate.
- * @return {Eithers[]} Filtered {@link Either} collection.
- * @example <caption>Filter and log failures</caption>
- *
- * const optionalValues = [
- *   getValue(path1, config), // => Right(value1)
- *   getValue(path2, config), // => Right(value2)
- *   getValue(path3, config), // => Left()
- *   getValue(path4, config) // => Left()
- * ];
- *
- * Either.filter(Either.isRight, optionalValues);
- * // => [Right(value1), Right(value2)]
+ * @memberof Either
+ * @param {*} other - Other value.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Boolean}
+ * @see Either#equals
  */
-Either.filter = filter;
+EitherType.equals = F.isEqual;
 
 /**
- * Creates an array of values by invoking {@link Either#map} with the <code>iteratee</code> for each {@link Either} in
- * the collection. The iteratee is invoked with one argument: <code>(value)</code>.
+ * Static implementation of {@link Either#filter}.
  * @static
- * @member
- * @param {Function} iteratee - The function to invoke per iteration.
- * @param {Either[]} values - Collection of values over which to iterate.
- * @return {Either[]} Mapped {@link Either} collection.
- * @example <caption>Mapping each Either's value</caption>
- *
- * const optionalValues = [
- *   getValue(path1, config), // => Right(1.5)
- *   getValue(path2, config), // => Right(2.25)
- *   getValue(path3, config), // => Left(error1)
- *   getValue(path4, config) // => Left(error2)
- * ];
- *
- * Either.mapIn(Math.floor, optionalValues);
- * // => [Right(1), Right(2), Left(error1), Left(error2)]
+ * @memberof Either
+ * @param {Predicate} predicate - A predicate.
+ * @param {*} leftValue - Value to use if the predicate returns {@code false}.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#filter
  */
-Either.mapIn = curry((iteratee, values) => map(invokeIn("map", iteratee), values));
+EitherType.filter = F.curryN(3, (predicate, leftValue, either) => either.filter(predicate, leftValue));
 
 /**
- * Creates an array of values by running each {@link Either} in collection through the <code>iteratee</code>. The
- * iteratee is invoked with one argument: <code>(value)</code>.
+ * Static implementation of {@link Either#fmap}.
  * @static
- * @member
- * @param {Function} iteratee - The function to invoke per iteration.
- * @param {Either[]} values - Collection of values over which to iterate.
- * @return {Either[]} Mapped collection.
- * @example <caption>Mapping all values to promises</caption>
- *
- * const optionalValues = [
- *   getValue(path1, config), // => Right(value1)
- *   getValue(path2, config), // => Right(value2)
- *   getValue(path3, config), // => Left(error1)
- *   getValue(path4, config) // => Left(error2)
- * ];
- *
- * Either.map(Either.toPromise, optionalValues);
- * // => [Promise.resolve(price1), Promise.resolve(price2), Promise.reject(error1), Promise.reject(error2)]
+ * @memberof Either
+ * @alias Either.map
+ * @param {Function} morphism - A mapping function.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#fmap
  */
-Either.map = map;
+EitherType.fmap = F.curry((morphism, either) => either.fmap(morphism));
 
 /**
- * Reduces collection to a value which is the accumulated result of running each value in the <code>values</code>
- * collection through the <code>iteratee</code>, where each successive invocation is supplied the return value of the
- * previous. The iteratee is invoked with two arguments: <code>(accumulator, value)</code>.
+ * Static implementation of {@link Either#foldl}.
  * @static
- * @member
- * @param {Reduction} iteratee - The function to invoke per iteration.
- * @param {*} accumulator - The initial value.
- * @param {Either[]} values - Collection of values over which to iterate.
- * @return {*} Accumulator.
+ * @memberof Either
+ * @param {LeftFold} leftFold - A left folding function.
+ * @param {*} defaultValue - The default value.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#foldl
+ */
+EitherType.foldl = F.curryN(3, (leftFold, defaultValue, either) => either.foldl(leftFold, defaultValue));
+
+/**
+ * Static implementation of {@link Either#foldr}.
+ * @static
+ * @memberof Either
+ * @alias reduce
+ * @param {RightFold} rightFold - A right folding function.
+ * @param {*} defaultValue - The default value.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#foldr
+ */
+EitherType.foldr = F.curryN(3, (rightFold, defaultValue, either) => either.foldr(rightFold, defaultValue));
+
+/**
+ * Static implementation of {@link Either#getOrElse}.
+ * @static
+ * @memberof Either
+ * @param {*} other - Other value.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#getOrElse
+ */
+EitherType.getOrElse = F.curry((other, either) => either.getOrElse(other));
+
+/**
+ * Static implementation of {@link Either#getOrElseGet}.
+ * @static
+ * @memberof Either
+ * @param {Supplier} supplier - A supplier.
+ * @param {Either} maybe - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#getOrElseGet
+ */
+EitherType.getOrElseGet = F.curry((supplier, maybe) => maybe.getOrElseGet(supplier));
+
+/**
+ * Static implementation of {@link Either#ifLeft}.
+ * @static
+ * @memberof Either
+ * @param {Consumer} consumer - A consumer.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#ifLeft
+ */
+EitherType.ifLeft = F.curry((consumer, either) => either.ifLeft(consumer));
+
+/**
+ * Static implementation of {@link Either#ifRight}.
+ * @static
+ * @memberof Either
+ * @param {Consumer} consumer - A consumer.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#ifRight
+ */
+EitherType.ifRight = F.curry((consumer, either) => either.ifRight(consumer));
+
+/**
+ * Maps the underlying values in an list of {@link Either}.
+ * @static
+ * @memberof Either
+ * @param {Function} morphism - A mapping function.
+ * @param {Either[]} list - A list of {@link Either}.
+ * @return {Either[]}
  * @example
  *
- * const eitherValues = [
- *   getValue(path1, config), // => Right(value1)
- *   getValue(path2, config), // => Right(value2)
- *   getValue(path3, config), // => Left(error1)
- *   getValue(path4, config) // => Left(error2)
- * ];
- *
- * // Using lodash/fp/concat
- * Either.reduce(
- *   (result, value) => value.isRight() ? concat(result, value.get()) : result,
- *   [],
- *   eitherValues
+ * Either.lift(
+ *   value => value + 1,
+ *   [Either.right(1), Either.right(2), Either.right(3)]
  * );
- * // => [value1, value2]
+ * // => [Right(2), Right(3), Right(4)]
  */
-Either.reduce = reduce;
+EitherType.lift = F.curry((morphism, list) => F.isArray(list) ?
+  F.map(EitherType.fmap(morphism), list) :
+  []
+);
 
 /**
- * Converts a {@link Either} to a {@link Maybe}. {@link Right} becomes a {@link Just} and {@link Left} becomes
- * {@link Nothing}.
+ * Static implementation of {@link Either#recover}.
  * @static
- * @member
+ * @memberof Either
+ * @param {*} value - Recover value or function that provides the value.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#recover
+ */
+EitherType.recover = F.curry((value, either) => either.recover(value));
+
+/**
+ * Static implementation of {@link Either#reduce}.
+ * @static
+ * @memberof Either
+ * @param {LeftFold} leftFold - A left folding function.
+ * @param {*} defaultValue - The default value.
+ * @return {*}
+ * @see Either#reduce
+ */
+EitherType.reduce = F.curry((leftFold, defaultValue, either) => either.reduce(leftFold, defaultValue));
+
+/**
+ * Static implementation of {@link Either#tap}.
+ * @static
+ * @memberof Either
+ * @param {Callable} leftConsumer - A left consumer.
+ * @param {Consumer} rightConsumer - A right consumer.
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#tap
+ */
+EitherType.tap = F.curryN(3, (leftConsumer, rightConsumer, either) => either.tap(leftConsumer, rightConsumer));
+
+/**
+ * Static implementation of {@link Either#toArray}.
+ * @static
+ * @memberof Either
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Array}
+ */
+EitherType.toArray = either => either.toArray();
+
+/**
+ * Static implementation of {@link Either#toMaybe}.
+ * @static
+ * @memberof Either
  * @param {Maybe} maybe - Maybe implementation.
- * @param {Either} value - Either to convert.
- * @return {Maybe} {@link Maybe} wrapped <code>value</code>.
- * @example <caption>Right to Just</caption>
- *
- * Either.toMaybe(Maybe, Right.from(value));
- * // => Maybe.Just(value);
- *
- * @example <caption>Left to Nothing</caption>
- *
- * Either.toMaybe(Maybe, Left.from(error));
- * // => Maybe.Nothing();
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#toMaybe
  */
-Either.toMaybe = invokeIn("toMaybe");
+EitherType.toMaybe = F.curry((maybe, either) => either.toMaybe(maybe));
 
 /**
- * Converts a validation to a <code>Promise</code> using the provided <code>Promise</code> implementation.
+ * Static implementation of {@link Either#toPromise}.
  * @static
- * @member
+ * @memberof Either
  * @param {Promise} promise - Promise implementation.
- * @param {Either} value - Either to convert.
- * @return {Promise} <code>Promise</code> wrapped <code>value</code>.
- * @example <caption>Convert with bluebird's implementation of Promise</caption>
- *
- * const toBluebird = Either.toPromise(require("bluebird"));
- *
- * toBluebird(Right.from(value));
- * // => Promise.resolve(value);
- *
- * toBluebird(Left.from(error));
- * // => Promise.reject(error);
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#toPromise
  */
-Either.toPromise = invokeIn("toPromise");
+EitherType.toPromise = F.curry((promise, either) => either.toPromise(promise));
 
 /**
- * Converts a {@link Either} to a {@link Validation}. {@link Right} becomes a {@link Success} and {@link Left} becomes
- * {@link Failure}.
+ * Static implementation of {@link Either#toValidation}.
  * @static
- * @member
+ * @memberof Either
  * @param {Validation} validation - Validation implementation.
- * @param {Either} value - Either to convert.
- * @return {Validation} {@link Validation} wrapped <code>value</code>.
- * @example <caption>Right to Success</caption>
- *
- * Either.toValidation(Validation, Right.from(value));
- * // => Validation.Success(value);
- *
- * @example <caption>Left to Failure</caption>
- *
- * Either.toValidation(Validation, Left.from(error));
- * // => Validation.Failure();
+ * @param {Either} either - An instance of {@link Either}.
+ * @return {Either}
+ * @see Either#toValidation
  */
-Either.toValidation = invokeIn("toValidation");
+EitherType.toValidation = F.curry((validation, either) => either.toValidation(validation));
 
-/**
- * @extends Either
- * @inheritdoc
- */
-class Left extends Either {
-  /**
-   * Creates a new {@link Left} from a <code>value</code>. If the <code>value</code> is already a {@link Either}
-   * instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Left} is made with the
-   * <code>value</code>.
-   * @static
-   * @param {*} value - Value to wrap in a {@link Left}.
-   * @return {Either} {@link Either} when is the <code>value</code> already wrapped or {@link Left} wrapped
-   * <code>value</code>.
-   * @example <caption>Left from nothing</caption>
-   *
-   * Left.from();
-   * // => Left()
-   *
-   * @example <caption>Left from arbitrary value</caption>
-   *
-   * Left.from(error);
-   * // => Left(error)
-   *
-   * @example <caption>Left from Right</caption>
-   *
-   * Left.from(Right.from(value));
-   * // => Right.from(value)
-   *
-   * @example <caption>Left from another Left</caption>
-   *
-   * Left.from(Left.from(error));
-   * // => Left(error)
-   */
-  static from(value) {
-    return Either.isEither(value) ?
-      value :
-      new Left(value);
-  }
+// Aliases
+EitherType.coalesce = EitherType.alt;
+EitherType.flatMap = EitherType.chain;
+EitherType.from = Either.from;
+EitherType.fromLeft = Either.fromLeft;
+EitherType.fromRight = Either.fromRight;
+EitherType.isEither = Either.isEither;
+EitherType.isLeft = Either.isLeft;
+EitherType.isNotEither = Either.isNotEither;
+EitherType.isNotLeft = Either.isNotLeft;
+EitherType.isNotRight = Either.isNotRight;
+EitherType.isRight = Either.isRight;
+EitherType.left = Either.left;
+EitherType.lefts = Either.lefts;
+EitherType.map = EitherType.fmap;
+EitherType.of = Either.pure;
+EitherType.ofNullable = Either.ofNullable;
+EitherType.pure = Either.pure;
+EitherType.reduce = EitherType.foldr;
+EitherType.right = Either.right;
+EitherType.rights = Either.rights;
 
-  constructor(value) {
-    super(value);
-  }
-
-  ap() {
-    return this;
-  }
-
-  bimap(leftMap) {
-    return Left.from(leftMap(this.value));
-  }
-
-  chain() {
-    return this;
-  }
-
-  extend() {
-    return this;
-  }
-
-  get() {
-    return null;
-  }
-
-  ifLeft(method) {
-    method();
-
-    return this;
-  }
-
-  ifRight() {
-    return this;
-  }
-
-  map() {
-    return this;
-  }
-
-  orElse(value) {
-    return value;
-  }
-
-  orElseGet(method) {
-    return method();
-  }
-
-  orElseThrow(method) {
-    throw method(this.value);
-  }
-
-  toMaybe(maybe) {
-    return new maybe.Nothing();
-  }
-
-  toPromise(promise) {
-    return promise.reject(this.value);
-  }
-
-  toString() {
-    return `Either.Left(${this.value})`;
-  }
-
-  toValidation(validation) {
-    return new validation.Failure(this.value);
-  }
-}
-
-/**
- * @extends Either
- * @inheritdoc
- */
-class Right extends Either {
-  /**
-   * Creates a new {@link Right} from a <code>value</code>. If the <code>value</code> is already a {@link Either}
-   * instance, the <code>value</code> is returned unchanged. Otherwise, a new {@link Right} is made with the
-   * <code>value</code>.
-   * @static
-   * @param {*} value - Value to wrap in a {@link Right}.
-   * @return {Either} {@link Either} when is the <code>value</code> already wrapped or {@link Right} wrapped
-   * <code>value</code>.
-   * @example <caption>Right from nothing</caption>
-   *
-   * Right.from();
-   * // => Right()
-   *
-   * @example <caption>Right from arbitrary value</caption>
-   *
-   * Right.from(true);
-   * // => Right(true)
-   *
-   * @example <caption>Right from another Right</caption>
-   *
-   * Right.from(Right.from(value));
-   * // => Right(value)
-   *
-   * @example <caption>Right from Left</caption>
-   *
-   * Right.from(Left.from(error));
-   * // => Left(error)
-   */
-  static from(value) {
-    return Either.isEither(value) ?
-      value :
-      new Right(value);
-  }
-
-  constructor(value) {
-    super(value);
-  }
-
-  ap(other) {
-    return other.map(this.value);
-  }
-
-  bimap(leftMap, rightMap) {
-    return Right.from(rightMap(this.value));
-  }
-
-  chain(method) {
-    return Either.from(method(this.value));
-  }
-
-  extend(method) {
-    return Either.from(method(this));
-  }
-
-  get() {
-    return this.value;
-  }
-
-  ifLeft() {
-    return this;
-  }
-
-  ifRight(method) {
-    method(this.value);
-
-    return this;
-  }
-
-  map(method) {
-    return Right.of(method(this.value));
-  }
-
-  orElse() {
-    return this.value;
-  }
-
-  orElseGet() {
-    return this.value;
-  }
-
-  orElseThrow() {
-    return this.value;
-  }
-
-  toMaybe(maybe) {
-    return new maybe.Just(this.value);
-  }
-
-  toPromise(promise) {
-    return promise.resolve(this.value);
-  }
-
-  toString() {
-    return `Either.Right(${this.value})`;
-  }
-
-  toValidation(validation) {
-    return new validation.Success(this.value);
-  }
-}
-
-module.exports = Either;
+module.exports = EitherType;

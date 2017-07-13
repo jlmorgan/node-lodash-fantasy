@@ -2,14 +2,14 @@
 
 // Third Party
 const curry = require("lodash/fp/curry");
-const identity = require("lodash/fp/identity");
 
 module.exports = curry((expect, Type) =>
   describe("Monad", () => {
     it("should express left identity", () => {
+      const testChain = value => Type(value);
       const testValue = true;
-      const testLeft = Type.of(testValue).chain(identity);
-      const testRight = Type.of(testValue);
+      const testLeft = Type.of(testValue).chain(testChain);
+      const testRight = testChain(testValue);
 
       expect(testLeft).to.eql(testRight);
     });

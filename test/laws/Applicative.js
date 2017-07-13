@@ -10,7 +10,7 @@ module.exports = curry((expect, Type) =>
 
     it("should express identity", () => {
       const testValue = true;
-      const testLeft = Type.of(identity).ap(Type.of(testValue));
+      const testLeft = Type.of(testValue).ap(Type.of(identity));
       const testRight = Type.of(testValue);
 
       expect(testLeft).to.eql(testRight);
@@ -18,7 +18,7 @@ module.exports = curry((expect, Type) =>
 
     it("should express homomorphism", () => {
       const testValue = true;
-      const testLeft = Type.of(identity).ap(Type.of(testValue));
+      const testLeft = Type.of(testValue).ap(Type.of(identity));
       const testRight = Type.of(identity(testValue));
 
       expect(testLeft).to.eql(testRight);
@@ -27,8 +27,8 @@ module.exports = curry((expect, Type) =>
     it("should express interchange", () => {
       const testValue = true;
       const testApplicative = Type.of(identity);
-      const testLeft = testApplicative.ap(Type.of(testValue));
-      const testRight = Type.of(thrush(testValue)).ap(testApplicative);
+      const testLeft = Type.of(testValue).ap(testApplicative);
+      const testRight = testApplicative.ap(Type.of(thrush(testValue)));
 
       expect(testLeft).to.eql(testRight);
     });
