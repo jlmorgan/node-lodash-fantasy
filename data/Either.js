@@ -229,6 +229,7 @@ EitherType.fmap = F.curry((morphism, either) => either.fmap(morphism));
  * Static implementation of {@link Either#foldl}.
  * @static
  * @memberof Either
+ * @alias reduce
  * @param {LeftFold} leftFold - A left folding function.
  * @param {*} defaultValue - The default value.
  * @param {Either} either - An instance of {@link Either}.
@@ -241,7 +242,6 @@ EitherType.foldl = F.curryN(3, (leftFold, defaultValue, either) => either.foldl(
  * Static implementation of {@link Either#foldr}.
  * @static
  * @memberof Either
- * @alias reduce
  * @param {RightFold} rightFold - A right folding function.
  * @param {*} defaultValue - The default value.
  * @param {Either} either - An instance of {@link Either}.
@@ -326,17 +326,6 @@ EitherType.lift = F.curry((morphism, list) => F.isArray(list) ?
 EitherType.recover = F.curry((value, either) => either.recover(value));
 
 /**
- * Static implementation of {@link Either#reduce}.
- * @static
- * @memberof Either
- * @param {LeftFold} leftFold - A left folding function.
- * @param {*} defaultValue - The default value.
- * @return {*}
- * @see Either#reduce
- */
-EitherType.reduce = F.curry((leftFold, defaultValue, either) => either.reduce(leftFold, defaultValue));
-
-/**
  * Static implementation of {@link Either#tap}.
  * @static
  * @memberof Either
@@ -408,7 +397,7 @@ EitherType.map = EitherType.fmap;
 EitherType.of = Either.pure;
 EitherType.ofNullable = Either.ofNullable;
 EitherType.pure = Either.pure;
-EitherType.reduce = EitherType.foldr;
+EitherType.reduce = EitherType.foldl;
 EitherType.right = Either.right;
 EitherType.rights = Either.rights;
 

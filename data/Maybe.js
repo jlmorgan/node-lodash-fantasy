@@ -199,6 +199,7 @@ MaybeType.fmap = F.curry((morphism, maybe) => maybe.fmap(morphism));
  * Static implementation of {@link Maybe#foldl}.
  * @static
  * @memberof Maybe
+ * @alias reduce
  * @param {LeftFold} leftFold - A left folding function.
  * @param {*} defaultValue - The default value.
  * @param {Maybe} maybe - An instance of {@link Maybe}.
@@ -211,7 +212,6 @@ MaybeType.foldl = F.curryN(3, (leftFold, defaultValue, maybe) => maybe.foldl(lef
  * Static implementation of {@link Maybe#foldr}.
  * @static
  * @memberof Maybe
- * @alias reduce
  * @param {RightFold} rightFold - A right folding function.
  * @param {*} defaultValue - The default value.
  * @param {Maybe} maybe - An instance of {@link Maybe}.
@@ -296,17 +296,6 @@ MaybeType.lift = F.curry((morphism, list) => F.isArray(list) ?
 MaybeType.recover = F.curry((value, maybe) => maybe.recover(value));
 
 /**
- * Static implementation of {@link Maybe#reduce}.
- * @static
- * @memberof Maybe
- * @param {LeftFold} leftFold - A left folding function.
- * @param {*} defaultValue - The default value.
- * @return {*}
- * @see Maybe#reduce
- */
-MaybeType.reduce = F.curry((leftFold, defaultValue, maybe) => maybe.reduce(leftFold, defaultValue));
-
-/**
  * Static implementation of {@link Maybe#tap}.
  * @static
  * @memberof Maybe
@@ -381,7 +370,7 @@ MaybeType.nothing = Maybe.nothing;
 MaybeType.of = Maybe.pure;
 MaybeType.ofNullable = Maybe.ofNullable;
 MaybeType.pure = Maybe.pure;
-MaybeType.reduce = MaybeType.foldr;
+MaybeType.reduce = MaybeType.foldl;
 MaybeType.zero = Maybe.zero;
 
 module.exports = MaybeType;

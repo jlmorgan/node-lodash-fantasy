@@ -262,7 +262,7 @@ describe("Maybe", () => {
       const testNothing = nothing();
       const testLeftFold = (value, defaultValue) => defaultValue;
       const expectedResult = testNothing.foldl(testLeftFold, testDefaultValue);
-      const actualResult = Either.foldl(testLeftFold, testDefaultValue)(testNothing);
+      const actualResult = Maybe.foldl(testLeftFold, testDefaultValue)(testNothing);
 
       expect(actualResult).to.eql(expectedResult);
     });
@@ -274,7 +274,7 @@ describe("Maybe", () => {
       const testNothing = nothing();
       const testRightFold = defaultValue => defaultValue;
       const expectedResult = testNothing.foldr(testRightFold, testDefaultValue);
-      const actualResult = Either.foldr(testRightFold, testDefaultValue)(testNothing);
+      const actualResult = Maybe.foldr(testRightFold, testDefaultValue)(testNothing);
 
       expect(actualResult).to.eql(expectedResult);
     });
@@ -539,6 +539,18 @@ describe("Maybe", () => {
       const testNothing = nothing();
       const expectedResult = testNothing.recover(testValue);
       const actualResult = Maybe.recover(testValue)(testNothing);
+
+      expect(actualResult).to.eql(expectedResult);
+    });
+  });
+
+  describe(".reduce", () => {
+    it("should match instance result", () => {
+      const testDefaultValue = testValue;
+      const testNothing = nothing();
+      const testLeftFold = (value, defaultValue) => defaultValue;
+      const expectedResult = testNothing.reduce(testLeftFold, testDefaultValue);
+      const actualResult = Maybe.reduce(testLeftFold, testDefaultValue)(testNothing);
 
       expect(actualResult).to.eql(expectedResult);
     });

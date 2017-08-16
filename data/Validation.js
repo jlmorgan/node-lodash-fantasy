@@ -228,7 +228,8 @@ ValidationType.fmap = F.curry((morphism, validation) => validation.fmap(morphism
  * Static implementation of {@link Validation#foldl}.
  * @static
  * @memberof Validation
- * @param {LeftFold} leftFold - A failure folding function.
+ * @alias reduce
+ * @param {LeftFold} leftFold - A left folding function.
  * @param {*} defaultValue - The default value.
  * @param {Validation} validation - An instance of {@link Validation}.
  * @return {Validation}
@@ -240,11 +241,9 @@ ValidationType.foldl = F.curryN(3, (leftFold, defaultValue, validation) => valid
  * Static implementation of {@link Validation#foldr}.
  * @static
  * @memberof Validation
- * @alias reduce
- * @param {RightFold} rightFold - A success folding function.
+ * @param {RightFold} rightFold - A right folding function.
  * @param {*} defaultValue - The default value.
- * @param {Validation} validation - An instance of {@link Validation}.
- * @return {Validation}
+ * @return {*}
  * @see Validation#foldr
  */
 ValidationType.foldr = F.curryN(3, (rightFold, defaultValue, validation) => validation.foldr(rightFold, defaultValue));
@@ -323,17 +322,6 @@ ValidationType.lift = F.curry((morphism, list) => F.isArray(list) ?
  * @see Validation#recover
  */
 ValidationType.recover = F.curry((value, validation) => validation.recover(value));
-
-/**
- * Static implementation of {@link Validation#reduce}.
- * @static
- * @memberof Validation
- * @param {LeftFold} leftFold - A failure folding function.
- * @param {*} defaultValue - The default value.
- * @return {*}
- * @see Validation#reduce
- */
-ValidationType.reduce = F.curry((leftFold, defaultValue, validation) => validation.reduce(leftFold, defaultValue));
 
 /**
  * Static implementation of {@link Validation#tap}.
@@ -430,7 +418,7 @@ ValidationType.of = Validation.pure;
 ValidationType.ofNullable = Validation.ofNullable;
 ValidationType.pass = Validation.pass;
 ValidationType.pure = Validation.pure;
-ValidationType.reduce = ValidationType.foldr;
+ValidationType.reduce = ValidationType.foldl;
 ValidationType.success = Validation.success;
 ValidationType.successs = Validation.successes;
 

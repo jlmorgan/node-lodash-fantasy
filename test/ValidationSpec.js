@@ -536,9 +536,9 @@ describe("Validation", () => {
     it("should match instance result", () => {
       const testDefaultValue = testValue;
       const testFailure = failure(testMessage);
-      const testFailureFold = (value, defaultValue) => defaultValue;
-      const expectedResult = testFailure.reduce(testFailureFold, testDefaultValue);
-      const actualResult = Validation.reduce(testFailureFold, testDefaultValue)(testFailure);
+      const testLeftFold = (value, defaultValue) => defaultValue;
+      const expectedResult = testFailure.reduce(testLeftFold, testDefaultValue);
+      const actualResult = Validation.reduce(testLeftFold, testDefaultValue)(testFailure);
 
       expect(actualResult).to.eql(expectedResult);
     });
