@@ -696,15 +696,27 @@ describe("Either", () => {
     });
 
     describe("#ap", () => {
-      const testLeft = left(testMessage);
-      const testApplyFunction = sinon.spy(F.constant(true));
-      const testApply = right(testApplyFunction);
-      let actualResult = null;
+      describe("with Left", () => {
+        it("should return the apply instance", () => {
+          const testLeft = left(`${testMessage}1`);
+          const testApply = left(`${testMessage}2`);
+          const actualResult = testLeft.ap(testApply);
 
-      before(() => actualResult = testLeft.ap(testApply));
+          expect(actualResult).to.equal(testApply);
+        });
+      });
 
-      it("should return the instance", () => expect(actualResult).to.equal(testLeft));
-      it("should not call the provided apply morphism", () => expect(testApplyFunction).to.not.be.called);
+      describe("with Right", () => {
+        const testLeft = left(testMessage);
+        const testApplyFunction = sinon.spy(F.constant(true));
+        const testApply = right(testApplyFunction);
+        let actualResult = null;
+
+        before(() => actualResult = testLeft.ap(testApply));
+
+        it("should return the instance", () => expect(actualResult).to.equal(testLeft));
+        it("should not call the provided apply morphism", () => expect(testApplyFunction).to.not.be.called);
+      });
     });
 
     describe("#bimap", () => {

@@ -223,6 +223,15 @@ describe("Validation", () => {
     );
   });
 
+  describe(".fail", () => {
+    it("should return a failure", () => {
+      const expectedResult = failure(testMessage);
+      const actualResult = Validation.fail(testMessage);
+
+      expect(actualResult).to.eql(expectedResult);
+    });
+  });
+
   describe(".failures", () => {
     it("should return empty list for null list", () => {
       const testList = null;
@@ -522,6 +531,15 @@ describe("Validation", () => {
     );
   });
 
+  describe(".pass", () => {
+    it("should return a failure", () => {
+      const expectedResult = success(testValue);
+      const actualResult = Validation.pass(testValue);
+
+      expect(actualResult).to.eql(expectedResult);
+    });
+  });
+
   describe(".recover", () => {
     it("should match instance result", () => {
       const testFailure = failure(testMessage);
@@ -710,15 +728,27 @@ describe("Validation", () => {
     });
 
     describe("#ap", () => {
-      const testFailure = failure(testMessage);
-      const testApplyFunction = sinon.spy(F.constant(true));
-      const testApply = success(testApplyFunction);
-      let actualResult = null;
+      describe("with Failure", () => {
+        it("should return the apply instance", () => {
+          const testFailure = failure(`${testMessage}1`);
+          const testApply = failure(`${testMessage}2`);
+          const actualResult = testFailure.ap(testApply);
 
-      before(() => actualResult = testFailure.ap(testApply));
+          expect(actualResult).to.equal(testApply);
+        });
+      });
 
-      it("should return the instance", () => expect(actualResult).to.equal(testFailure));
-      it("should not call the provided apply morphism", () => expect(testApplyFunction).to.not.be.called);
+      describe("with Success", () => {
+        const testFailure = failure(testMessage);
+        const testApplyFunction = sinon.spy(F.constant(true));
+        const testApply = success(testApplyFunction);
+        let actualResult = null;
+
+        before(() => actualResult = testFailure.ap(testApply));
+
+        it("should return the instance", () => expect(actualResult).to.equal(testFailure));
+        it("should not call the provided apply morphism", () => expect(testApplyFunction).to.not.be.called);
+      });
     });
 
     describe("#bimap", () => {
